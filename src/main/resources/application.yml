@@ -1,0 +1,9 @@
+spring:
+  application:
+    name: ${PROJECT_NAME:soa_lab1}
+  profiles:
+    active: ${SPRING_PROFILE_NAME:local}
+
+api:
+  auth:
+    users: ${APP_AUTH_USERS}
