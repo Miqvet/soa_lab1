@@ -3,6 +3,7 @@ package ru.itmo.labs.soa_lab1.controller;
 import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import ru.itmo.labs.soa_lab1.repository.entity.Flat;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -81,5 +82,11 @@ public class FlatController {
         return flats.values().stream()
                 .map(flat -> flat.get("livingSpace"))
                 .collect(Collectors.toSet());
+    }
+
+    @Operation(summary = "Тестовый контроллер для отображения")
+    @GetMapping("/flats")
+    public Flat test() {
+        return null;
     }
 }
