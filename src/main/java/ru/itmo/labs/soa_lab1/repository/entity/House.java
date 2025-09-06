@@ -13,6 +13,7 @@ import lombok.Data;
 import lombok.Setter;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
+@Schema(description = "Дом")
 @AllArgsConstructor
 @Builder
 @Data

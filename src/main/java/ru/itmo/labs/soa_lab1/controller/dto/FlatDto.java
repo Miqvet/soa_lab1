@@ -15,6 +15,7 @@ import ru.itmo.labs.soa_lab1.repository.entity.Transport;
 
 import java.time.LocalDate;
 
+@Schema(description = "Запрос на создание или обновление квартиры")
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @AllArgsConstructor
 @Builder
