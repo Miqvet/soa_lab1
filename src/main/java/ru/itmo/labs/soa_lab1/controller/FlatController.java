@@ -7,6 +7,8 @@ import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import ru.itmo.labs.soa_lab1.controller.dto.FlatDto;
+import ru.itmo.labs.soa_lab1.controller.dto.FlatMapper;
 import ru.itmo.labs.soa_lab1.repository.entity.Flat;
 import ru.itmo.labs.soa_lab1.repository.entity.Furnish;
 
@@ -25,8 +27,10 @@ public class FlatController {
 
     @Operation(summary = "Добавить новую квартиру")
     @PostMapping
-    public ResponseEntity<Flat> createFlat(@Valid @RequestBody Flat flat) {
+    public ResponseEntity<Flat> createFlat(@Valid @RequestBody FlatDto flatDto) {
         var newId = idCounter.getAndIncrement();
+        var flat = FlatMapper.mapFlatFromFlatDto(flatDto);
+        flat.setCreationDate(LocalDate.now());
         flat.setId((int) newId);
         flat.setCreationDate(LocalDate.now());
         flats.put(newId, flat);
@@ -46,11 +50,12 @@ public class FlatController {
     @PutMapping("/{id}")
     public ResponseEntity<Flat> updateFlat(
             @Parameter(description = "ID квартиры") @PathVariable Long id,
-            @Valid @RequestBody Flat flat) {
+            @Valid @RequestBody FlatDto flatDto) {
         if (!flats.containsKey(id)) {
             return ResponseEntity.notFound().build();
         }
-        
+        var flat = FlatMapper.mapFlatFromFlatDto(flatDto);
+
         var existingFlat = flats.get(id);
         flat.setId(existingFlat.getId());
         flat.setCreationDate(existingFlat.getCreationDate());
@@ -68,6 +73,14 @@ public class FlatController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
+    @Operation(summary = "Получить список квартир")
+    @GetMapping()
+    public List<Flat> getAllFlats() {
+        return flats.values().stream().toList();
+    }
+
+    //last three
+
     @Operation(summary = "Удалить квартиры по типу отделки")
     @DeleteMapping("/by-furnish/{furnish}")
     public ResponseEntity<Void> deleteByFurnish(
@@ -83,7 +96,7 @@ public class FlatController {
             @Parameter(description = "Минимальное количество комнат") @PathVariable Integer rooms) {
         return flats.values().stream()
                 .filter(flat -> flat.getNumberOfRooms() > rooms)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @Operation(summary = "Получить уникальные значения жилой площади")
@@ -92,18 +105,5 @@ public class FlatController {
         return flats.values().stream()
                 .map(Flat::getLivingSpace)
                 .collect(Collectors.toSet());
-    }
-
-    private Object getFieldValue(Flat flat, String fieldName) {
-        switch (fieldName) {
-            case "id": return flat.getId();
-            case "name": return flat.getName();
-            case "area": return flat.getArea();
-            case "numberOfRooms": return flat.getNumberOfRooms();
-            case "livingSpace": return flat.getLivingSpace();
-            case "furnish": return flat.getFurnish();
-            case "transport": return flat.getTransport();
-            default: return null;
-        }
     }
 }

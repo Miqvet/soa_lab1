@@ -6,4 +6,4 @@ spring:
 
 api:
   auth:
-    users: ${APP_AUTH_USERS}
+    users: ${APP_AUTH_USERS:[{"username":"user","password":"test","roles":["api_user"]}]}

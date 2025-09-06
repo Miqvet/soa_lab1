@@ -1,3 +1,0 @@
-api:
-  auth:
-    users: '[{"username":"user","password":"test","roles":["api_user"]}]'

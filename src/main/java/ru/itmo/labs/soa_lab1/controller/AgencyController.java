@@ -15,7 +15,6 @@ public class AgencyController {
     public ResponseEntity<Map<String, Object>> findWithBalcony(
             @PathVariable Boolean cheapest,
             @PathVariable Boolean withBalcony) {
-        // Заглушка реализации
         return ResponseEntity.ok().body(Map.of(
             "message", "Функция в разработке",
             "cheapest", cheapest,
@@ -29,7 +28,6 @@ public class AgencyController {
             @PathVariable Long id1,
             @PathVariable Long id2,
             @PathVariable Long id3) {
-        // Заглушка реализации
         return ResponseEntity.ok().body(Map.of(
             "message", "Функция в разработке",
             "comparedFlats", List.of(id1, id2, id3)
