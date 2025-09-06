@@ -11,6 +11,7 @@ import lombok.Data;
 import lombok.Setter;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
+@Schema(description = "Координаты")
 @AllArgsConstructor
 @Builder
 @Data

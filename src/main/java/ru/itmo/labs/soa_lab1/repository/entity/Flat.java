@@ -12,6 +12,7 @@ import lombok.Setter;
 import java.time.LocalDate;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
+@Schema(description = "Квартира")
 @AllArgsConstructor
 @Builder
 @Data
