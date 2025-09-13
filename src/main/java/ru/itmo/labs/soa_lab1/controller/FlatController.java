@@ -12,10 +12,7 @@ import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import ru.itmo.labs.soa_lab1.controller.dto.ErrorResponse;
-import ru.itmo.labs.soa_lab1.controller.dto.FlatDto;
-import ru.itmo.labs.soa_lab1.controller.dto.FlatMapper;
-import ru.itmo.labs.soa_lab1.controller.dto.FlatPageResponse;
+import ru.itmo.labs.soa_lab1.controller.dto.*;
 import ru.itmo.labs.soa_lab1.repository.entity.Flat;
 import ru.itmo.labs.soa_lab1.repository.entity.Furnish;
 import ru.itmo.labs.soa_lab1.repository.entity.Transport;
@@ -93,7 +90,7 @@ public class FlatController {
         var existingFlat = flats.get(id);
         flat.setId(existingFlat.getId());
         flat.setCreationDate(existingFlat.getCreationDate());
-        
+
         flats.put(id, flat);
         return ResponseEntity.ok(flat);
     }
@@ -123,8 +120,40 @@ public class FlatController {
             @ApiResponse(responseCode = "500", description = "Внутренняя ошибка сервера",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
-    @GetMapping
+    @PostMapping("/filtered")
     public ResponseEntity<FlatPageResponse> getFlats(
+            // Параметры фильтрации
+            @Parameter(description = "Поля фильтрации")
+            @RequestBody FlatsFilterDto flatsFilter,
+
+            // Параметры сортировки
+            @Parameter(description = "Поле для сортировки (name, area, numberOfRooms, etc.)")
+            @RequestParam(required = false) String sortBy,
+
+            @Parameter(description = "Направление сортировки (asc, desc)")
+            @RequestParam(required = false, defaultValue = "asc") String sortDirection,
+
+            // Параметры пагинации
+            @Parameter(description = "Номер страницы (начиная с 0)")
+            @RequestParam(required = false, defaultValue = "0") Integer page,
+
+            @Parameter(description = "Размер страницы")
+            @RequestParam(required = false, defaultValue = "20") Integer size) {
+
+        return ResponseEntity.ok().body(null); // Заглушка
+    }
+
+    @Operation(summary = "Получить список квартир с фильтрацией, сортировкой и постраничным выводом")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Список квартир успешно получен",
+                    content = @Content(schema = @Schema(implementation = FlatPageResponse.class))),
+            @ApiResponse(responseCode = "400", description = "Неверные параметры запроса",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "500", description = "Внутренняя ошибка сервера",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    })
+    @GetMapping()
+    public ResponseEntity<FlatPageResponse> getFlatsPost(
             // Параметры фильтрации
             @Parameter(description = "Фильтр по названию") @RequestParam(required = false) String name,
             @Parameter(description = "Фильтр по минимальной площади") @RequestParam(required = false) Integer minArea,
@@ -159,10 +188,10 @@ public class FlatController {
             @ApiResponse(responseCode = "500", description = "Внутренняя ошибка сервера",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
-    @DeleteMapping("/by-furnish/{furnish}")
+    @DeleteMapping("/by_furnish/{furnish}")
     public ResponseEntity<Void> deleteByFurnish(
             @Parameter(description = "Тип отделки") @PathVariable Furnish furnish) {
-        flats.values().removeIf(flat -> 
+        flats.values().removeIf(flat ->
             furnish.equals(flat.getFurnish()));
         return ResponseEntity.ok().build();
     }
@@ -174,7 +203,7 @@ public class FlatController {
             @ApiResponse(responseCode = "500", description = "Внутренняя ошибка сервера",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
-    @GetMapping("/rooms-greater-than/{rooms}")
+    @GetMapping("/rooms_greater_than/{rooms}")
     public List<Flat> getFlatsWithMoreRooms(
             @Parameter(description = "Минимальное количество комнат") @PathVariable Integer rooms) {
         return flats.values().stream()
@@ -189,7 +218,7 @@ public class FlatController {
             @ApiResponse(responseCode = "500", description = "Внутренняя ошибка сервера",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
-    @GetMapping("/unique-living-spaces")
+    @GetMapping("/unique_living_spaces")
     public Set<Double> getUniqueLivingSpaces() {
         return flats.values().stream()
                 .map(Flat::getLivingSpace)
