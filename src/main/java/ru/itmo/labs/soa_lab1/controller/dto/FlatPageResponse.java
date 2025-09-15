@@ -15,14 +15,20 @@ import java.util.List;
 @Builder
 @Data
 public class FlatPageResponse {
-    @Schema(description = "Список квартир на текущей странице", 
-             requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(description = "Список квартир на текущей странице",
+            requiredMode = Schema.RequiredMode.REQUIRED)
     private List<Flat> flats;
-    @Schema(description = "Номер текущей страницы (начиная с 0)", 
-             minimum = "0", 
-             requiredMode = Schema.RequiredMode.REQUIRED)
-    private int page;
+    @Schema(description = "Номер текущей страницы (начиная с 0)",
+            minimum = "0",
+            requiredMode = Schema.RequiredMode.REQUIRED)
+    private int pageNumber;
     @Schema(description = "Количество элементов на странице",
-             requiredMode = Schema.RequiredMode.REQUIRED)
-    private int size;
+            requiredMode = Schema.RequiredMode.REQUIRED)
+    private int pageNumberOfElements;
+    @Schema(description = "Количество страниц всего",
+            requiredMode = Schema.RequiredMode.REQUIRED)
+    private int totalPages;
+    @Schema(description = "Количество элементов всего",
+            requiredMode = Schema.RequiredMode.REQUIRED)
+    private int numberOfElements;
 }

@@ -97,7 +97,7 @@ public class FlatController {
 
     @Operation(summary = "Удалить квартиру по ID")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Квартира успешно удалена"),
+            @ApiResponse(responseCode = "204", description = "Квартира успешно удалена"),
             @ApiResponse(responseCode = "404", description = "Квартира не найдена",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
             @ApiResponse(responseCode = "500", description = "Внутренняя ошибка сервера",
@@ -107,7 +107,7 @@ public class FlatController {
     public ResponseEntity<Void> deleteFlat(
             @Parameter(description = "ID квартиры") @PathVariable Long id) {
         return Optional.ofNullable(flats.remove(id))
-                .map(flat -> ResponseEntity.ok().<Void>build())
+                .map(flat -> ResponseEntity.noContent().<Void>build())
                 .orElse(ResponseEntity.notFound().build());
     }
 
@@ -120,7 +120,7 @@ public class FlatController {
             @ApiResponse(responseCode = "500", description = "Внутренняя ошибка сервера",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
-    @PostMapping("/filtered")
+    @PostMapping("/filter")
     public ResponseEntity<FlatPageResponse> getFlats(
             // Параметры фильтрации
             @Parameter(description = "Поля фильтрации")
@@ -135,47 +135,10 @@ public class FlatController {
 
             // Параметры пагинации
             @Parameter(description = "Номер страницы (начиная с 0)")
-            @RequestParam(required = false, defaultValue = "0") Integer page,
+            @RequestParam(required = false, defaultValue = "0") Integer pageNumber,
 
             @Parameter(description = "Размер страницы")
-            @RequestParam(required = false, defaultValue = "20") Integer size) {
-
-        return ResponseEntity.ok().body(null); // Заглушка
-    }
-
-    @Operation(summary = "Получить список квартир с фильтрацией, сортировкой и постраничным выводом")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Список квартир успешно получен",
-                    content = @Content(schema = @Schema(implementation = FlatPageResponse.class))),
-            @ApiResponse(responseCode = "400", description = "Неверные параметры запроса",
-                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-            @ApiResponse(responseCode = "500", description = "Внутренняя ошибка сервера",
-                    content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
-    })
-    @GetMapping()
-    public ResponseEntity<FlatPageResponse> getFlatsPost(
-            // Параметры фильтрации
-            @Parameter(description = "Фильтр по названию") @RequestParam(required = false) String name,
-            @Parameter(description = "Фильтр по минимальной площади") @RequestParam(required = false) Integer minArea,
-            @Parameter(description = "Фильтр по максимальной площади") @RequestParam(required = false) Integer maxArea,
-            @Parameter(description = "Фильтр по минимальному количеству комнат") @RequestParam(required = false) Integer minRooms,
-            @Parameter(description = "Фильтр по максимальному количеству комнат") @RequestParam(required = false) Integer maxRooms,
-            @Parameter(description = "Фильтр по типу отделки") @RequestParam(required = false) Furnish furnish,
-            @Parameter(description = "Фильтр по транспорту") @RequestParam(required = false) Transport transport,
-
-            // Параметры сортировки
-            @Parameter(description = "Поле для сортировки (name, area, numberOfRooms, etc.)")
-            @RequestParam(required = false) String sortBy,
-
-            @Parameter(description = "Направление сортировки (asc, desc)")
-            @RequestParam(required = false, defaultValue = "asc") String sortDirection,
-
-            // Параметры пагинации
-            @Parameter(description = "Номер страницы (начиная с 0)")
-            @RequestParam(required = false, defaultValue = "0") Integer page,
-
-            @Parameter(description = "Размер страницы")
-            @RequestParam(required = false, defaultValue = "20") Integer size) {
+            @RequestParam(required = false, defaultValue = "20") Integer pageSize) {
 
         return ResponseEntity.ok().body(null); // Заглушка
     }
@@ -184,26 +147,27 @@ public class FlatController {
 
     @Operation(summary = "Удалить квартиры по типу отделки")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Квартиры успешно удалены"),
+            @ApiResponse(responseCode = "204", description = "Квартиры успешно удалены"),
+            @ApiResponse(responseCode = "404", description = "Тип отделки не найден"),
             @ApiResponse(responseCode = "500", description = "Внутренняя ошибка сервера",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
-    @DeleteMapping("/by_furnish/{furnish}")
+    @DeleteMapping("/by-furnish/{furnish}")
     public ResponseEntity<Void> deleteByFurnish(
             @Parameter(description = "Тип отделки") @PathVariable Furnish furnish) {
-        flats.values().removeIf(flat ->
-            furnish.equals(flat.getFurnish()));
-        return ResponseEntity.ok().build();
+        flats.values().removeIf(flat -> furnish.equals(flat.getFurnish()));
+        return ResponseEntity.noContent().build();
     }
 
     @Operation(summary = "Получить квартиры с количеством комнат больше указанного")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Список квартир получен",
                     content = @Content(array = @ArraySchema(schema = @Schema(implementation = Flat.class)))),
+            @ApiResponse(responseCode = "404", description = "Квартир не найдено"),
             @ApiResponse(responseCode = "500", description = "Внутренняя ошибка сервера",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
-    @GetMapping("/rooms_greater_than/{rooms}")
+    @GetMapping("/rooms-greater-than/{rooms}")
     public List<Flat> getFlatsWithMoreRooms(
             @Parameter(description = "Минимальное количество комнат") @PathVariable Integer rooms) {
         return flats.values().stream()
@@ -213,15 +177,37 @@ public class FlatController {
 
     @Operation(summary = "Получить уникальные значения жилой площади")
     @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "Запущен поиск уникальных значений жилой площади"),
+            @ApiResponse(responseCode = "500", description = "Внутренняя ошибка сервера",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    })
+    @PostMapping("/unique-living-spaces")
+    public ResponseEntity<Void> launchUniqueLivingSpacesJob() {
+        return ResponseEntity.noContent().build();
+    }
+
+    @Operation(summary = "Получить уникальные значения жилой площади")
+    @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Уникальные значения жилой площади получены",
                     content = @Content(array = @ArraySchema(schema = @Schema(implementation = Double.class)))),
             @ApiResponse(responseCode = "500", description = "Внутренняя ошибка сервера",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
-    @GetMapping("/unique_living_spaces")
+    @GetMapping("/unique-living-spaces")
     public Set<Double> getUniqueLivingSpaces() {
         return flats.values().stream()
                 .map(Flat::getLivingSpace)
                 .collect(Collectors.toSet());
+    }
+
+    @Operation(summary = "Отменить поиск уникальных значений жилой площади")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "Поиск уникальных значений жилой площади отменен"),
+            @ApiResponse(responseCode = "500", description = "Внутренняя ошибка сервера",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    })
+    @DeleteMapping("/unique-living-spaces")
+    public ResponseEntity<Void> cancelUniqueLivingSpacesJob() {
+        return ResponseEntity.noContent().build();
     }
 }

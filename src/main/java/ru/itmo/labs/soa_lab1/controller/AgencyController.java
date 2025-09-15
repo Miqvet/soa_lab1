@@ -27,7 +27,7 @@ public class AgencyController {
             @ApiResponse(responseCode = "500", description = "Внутренняя ошибка сервера",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
-    @GetMapping("/find-with-balcony/{cheapest}/{withBalcony}")
+    @PostMapping("/find-with-balcony/{cheapest}/{withBalcony}")
     public ResponseEntity<Map<String, Object>> findWithBalcony(
             @PathVariable Boolean cheapest,
             @PathVariable Boolean withBalcony) {
@@ -47,7 +47,7 @@ public class AgencyController {
             @ApiResponse(responseCode = "500", description = "Внутренняя ошибка сервера",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
-    @GetMapping("/get-most-expensive/{id1}/{id2}/{id3}")
+    @PostMapping("/get-most-expensive/{id1}/{id2}/{id3}")
     public ResponseEntity<Map<String, Object>> getMostExpensive(
             @PathVariable Long id1,
             @PathVariable Long id2,
