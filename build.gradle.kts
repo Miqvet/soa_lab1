@@ -25,11 +25,14 @@ repositories {
 }
 
 dependencies {
+    implementation("org.springframework.boot:spring-boot-starter-data-jpa")
+    implementation("org.postgresql:postgresql:42.7.8")
     implementation("org.springframework.boot:spring-boot-starter-security")
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-web-services")
     implementation("io.swagger.core.v3:swagger-annotations:2.2.34")
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.12")
+    implementation("org.projectlombok:lombok")
     implementation("org.springframework.data:spring-data-commons:3.5.2")
     compileOnly("org.projectlombok:lombok")
     developmentOnly("org.springframework.boot:spring-boot-devtools")

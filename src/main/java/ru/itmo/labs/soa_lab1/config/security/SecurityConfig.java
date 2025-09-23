@@ -29,7 +29,7 @@ public class SecurityConfig {
             .csrf(AbstractHttpConfigurer::disable)
             .authorizeHttpRequests(authorize -> authorize
                 .requestMatchers("/swagger-ui/**", "/swagger-resources/*", "/v3/api-docs/**", "/v3/api-docs.yaml").permitAll()
-                .requestMatchers("/api/**").hasRole(API_USER_ROLE))
+                .requestMatchers("/api/**").permitAll())
             .httpBasic(Customizer.withDefaults())
             .sessionManagement(conf -> conf.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .build();
