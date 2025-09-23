@@ -6,7 +6,7 @@
     <q-card class="q-mb-md">
       <q-card-section>
         <div class="text-h6">Найти самую дорогую квартиру из трех</div>
-        <q-form @submit="findMostExpensive" class="q-gutter-md">
+        <q-form @submit="findMostExpensive" class="q-gutter-pa-md">
           <div class="row q-col-gutter-md">
             <div class="col-12 col-sm-4">
               <q-input
@@ -49,7 +49,7 @@
     <q-card>
       <q-card-section>
         <div class="text-h6">Найти квартиру с балконом</div>
-        <q-form @submit="findBalconyFlat" class="q-gutter-md">
+        <q-form @submit="findBalconyFlat" class="q-gutter-pa-md">
           <div class="row q-col-gutter-md">
             <div class="col-12 col-sm-6">
               <q-select

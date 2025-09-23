@@ -4,6 +4,7 @@ import { Quasar } from 'quasar'
 import quasarLang from 'quasar/lang/ru'
 import quasarIconSet from 'quasar/icon-set/material-icons'
 
+// Импорты стилей
 import '@quasar/extras/material-icons/material-icons.css'
 import 'quasar/src/css/index.sass'
 
@@ -14,7 +15,6 @@ const app = createApp(App)
 app.use(Quasar, {
   lang: quasarLang,
   iconSet: quasarIconSet,
-  plugins: {},
 })
 
 app.use(router)

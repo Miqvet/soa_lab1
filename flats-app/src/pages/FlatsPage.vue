@@ -2,93 +2,83 @@
   <q-page class="q-pa-md">
     <div class="text-h4 q-mb-md">Управление квартирами</div>
 
-    <!-- Фильтры -->
-    <q-card class="q-mb-md">
-      <q-card-section>
-        <div class="text-h6">Фильтры</div>
-        <q-form @submit="loadFlats" class="q-gutter-md">
-          <div class="row q-col-gutter-md">
-            <div class="col-12 col-sm-6 col-md-3">
-              <q-input v-model="filters.name" label="Название" />
-            </div>
-            <div class="col-12 col-sm-6 col-md-3">
-              <q-input v-model="filters.min_area" type="number" label="Мин. площадь" />
-            </div>
-            <div class="col-12 col-sm-6 col-md-3">
-              <q-input v-model="filters.max_area" type="number" label="Макс. площадь" />
-            </div>
-            <div class="col-12 col-sm-6 col-md-3">
-              <q-input v-model="filters.min_rooms" type="number" label="Мин. комнаты" />
-            </div>
-            <div class="col-12 col-sm-6 col-md-3">
-              <q-input v-model="filters.max_rooms" type="number" label="Макс. комнаты" />
-            </div>
-            <div class="col-12 col-sm-6 col-md-3">
-              <q-select
-                v-model="filters.furnish"
-                :options="furnishOptions"
-                label="Отделка"
-                emit-value
-                map-options
-              />
-            </div>
-            <div class="col-12 col-sm-6 col-md-3">
-              <q-select
-                v-model="filters.transport"
-                :options="transportOptions"
-                label="Транспорт"
-                emit-value
-                map-options
-              />
-            </div>
-            <div class="col-12 col-sm-6 col-md-3 flex items-end">
-              <q-btn label="Применить фильтры" type="submit" color="primary" />
-              <q-btn label="Сбросить" @click="resetFilters" color="secondary" class="q-ml-sm" />
-            </div>
-          </div>
-        </q-form>
-      </q-card-section>
-    </q-card>
-
     <!-- Дополнительные действия -->
     <div class="q-mb-md">
       <q-btn label="Добавить квартиру" @click="showAddDialog = true" color="positive" class="q-mr-sm" />
-      <q-btn label="Уникальные жилые площади" @click="getUniqueLivingSpaces" color="info" class="q-mr-sm" />
+      <div class="row items-center q-gutter-sm q-mt-xs"></div>
+      <!-- Кнопки для работы с уникальными значениями жилой площади -->
+      <q-btn 
+        label="Запустить задачу" 
+        @click="launchUniqueLivingSpacesJob" 
+        color="info" 
+        class="q-mr-sm"
+        :loading="jobLoading"
+      />
+      <q-btn 
+        label="Получить результат" 
+        @click="getUniqueLivingSpaces" 
+        color="info" 
+        class="q-mr-sm"
+        :disable="!uniqueSpacesResult"
+      />
+      <q-btn 
+        label="Отменить задачу" 
+        @click="cancelUniqueLivingSpacesJob" 
+        color="negative" 
+        class="q-mr-sm"
+      />
+      <div class="row items-center q-gutter-sm q-mt-xs"></div>
       <q-btn label="Удалить по отделке" @click="showDeleteByFurnishDialog = true" color="negative" />
-    </div>
 
-    <!-- Таблица квартир -->
-    <q-table
-      :rows="flats"
-      :columns="columns"
-      row-key="id"
-      :loading="loading"
-      :pagination="pagination"
-      @request="onRequest"
-      binary-state-sort
-    >
-      <template v-slot:body-cell-actions="props">
-        <q-td :props="props">
-          <q-btn icon="edit" size="sm" flat @click="editFlat(props.row)" class="q-mr-xs" />
-          <q-btn icon="delete" size="sm" flat @click="deleteFlat(props.row.id)" />
-        </q-td>
-      </template>
-    </q-table>
+      <!-- Поиск и удаление по ID -->
+      <div class="row items-center q-gutter-sm q-mt-xs">
+
+        <q-btn 
+          label="Найти по ID" 
+          @click="getFlatById" 
+          color="info" 
+          :disable="!flatId"
+        />
+        <q-btn 
+          label="Удалить по ID" 
+          @click="deleteFlatById" 
+          color="negative" 
+          :disable="!flatId"
+        />
+
+        <q-input class="q-mt-lg"
+          v-model="flatId"
+          label="ID квартиры"
+          type="number"
+          outlined
+          dense
+          style="min-width: 150px; max-width: 200px"
+          :rules="[val => val > 0 || 'ID должен быть положительным числом']"
+        />
+      </div>
+    </div>
 
     <!-- Диалог добавления/редактирования квартиры -->
     <q-dialog v-model="showAddDialog" persistent>
-      <q-card style="min-width: 70%">
-        <q-card-section>
+      <q-card style="min-width: 70%; max-width: 900px">
+        <q-card-section class="bg-primary text-white">
           <div class="text-h6">{{ editingFlat ? 'Редактирование' : 'Добавление' }} квартиры</div>
         </q-card-section>
 
-        <q-card-section class="q-pt-none">
-          <q-form @submit="saveFlat" class="q-gutter-md">
-            <div class="row q-col-gutter-md">
+        <q-card-section class="q-pt-lg scroll" style="max-height: 70vh">
+          <q-form @submit="saveFlat" class="q-gutter-pa-lg">
+            <!-- Основная информация -->
+            <div class="row q-col-gutter-lg">
+              <div class="col-12">
+                <div class="text-subtitle1 text-weight-medium q-pb-sm">Основная информация</div>
+                <q-separator />
+              </div>
+              
               <div class="col-12 col-sm-6">
                 <q-input
                   v-model="flatForm.name"
                   label="Название *"
+                  outlined
                   :rules="[val => !!val || 'Обязательное поле']"
                 />
               </div>
@@ -97,6 +87,7 @@
                   v-model="flatForm.area"
                   type="number"
                   label="Площадь *"
+                  outlined
                   :rules="[
                     val => !!val || 'Обязательное поле',
                     val => val > 0 && val <= 784 || 'Площадь должна быть от 1 до 784'
@@ -108,6 +99,7 @@
                   v-model="flatForm.number_of_rooms"
                   type="number"
                   label="Количество комнат *"
+                  outlined
                   :rules="[
                     val => !!val || 'Обязательное поле',
                     val => val > 0 && val <= 8 || 'Количество комнат должно быть от 1 до 8'
@@ -119,6 +111,7 @@
                   v-model="flatForm.living_space"
                   type="number"
                   label="Жилая площадь *"
+                  outlined
                   :rules="[val => !!val || 'Обязательное поле']"
                 />
               </div>
@@ -127,6 +120,7 @@
                   v-model="flatForm.furnish"
                   :options="furnishOptions"
                   label="Отделка *"
+                  outlined
                   emit-value
                   map-options
                   :rules="[val => !!val || 'Обязательное поле']"
@@ -137,27 +131,34 @@
                   v-model="flatForm.transport"
                   :options="transportOptions"
                   label="Транспорт *"
+                  outlined
                   emit-value
                   map-options
                   :rules="[val => !!val || 'Обязательное поле']"
                 />
               </div>
-              <div class="col-12 col-sm-6">
+              <div class="col-12">
                 <q-checkbox
                   v-model="flatForm.balcony"
                   label="Балкон"
+                  size="lg"
                 />
               </div>
-
-              <!-- Координаты -->
+            </div>
+            
+            <!-- Координаты -->
+            <div class="row q-col-gutter-lg q-mt-md">
               <div class="col-12">
-                <div class="text-subtitle1">Координаты</div>
+                <div class="text-subtitle1 text-weight-medium q-pb-sm">Координаты</div>
+                <q-separator />
               </div>
+              
               <div class="col-12 col-sm-6">
                 <q-input
                   v-model="flatForm.coordinates.x"
                   type="number"
                   label="Координата X *"
+                  outlined
                   :rules="[
                     val => !!val || 'Обязательное поле',
                     val => val > -13 || 'Значение должно быть больше -13'
@@ -169,21 +170,27 @@
                   v-model="flatForm.coordinates.y"
                   type="number"
                   label="Координата Y *"
+                  outlined
                   :rules="[
                     val => !!val || 'Обязательное поле',
                     val => val > -733 || 'Значение должно быть больше -733'
                   ]"
                 />
               </div>
-
-              <!-- Дом -->
+            </div>
+            
+            <!-- Дом -->
+            <div class="row q-col-gutter-lg q-mt-md">
               <div class="col-12">
-                <div class="text-subtitle1">Дом</div>
+                <div class="text-subtitle1 text-weight-medium q-pb-sm">Информация о доме</div>
+                <q-separator />
               </div>
+              
               <div class="col-12 col-sm-6">
                 <q-input
                   v-model="flatForm.house.name"
                   label="Название дома *"
+                  outlined
                   :rules="[val => !!val || 'Обязательное поле']"
                 />
               </div>
@@ -192,6 +199,7 @@
                   v-model="flatForm.house.year"
                   type="number"
                   label="Год постройки *"
+                  outlined
                   :rules="[
                     val => !!val || 'Обязательное поле',
                     val => val >= 1 && val <= 370 || 'Год должен быть от 1 до 370'
@@ -203,6 +211,7 @@
                   v-model="flatForm.house.number_of_floors"
                   type="number"
                   label="Количество этажей *"
+                  outlined
                   :rules="[
                     val => !!val || 'Обязательное поле',
                     val => val >= 1 || 'Должен быть хотя бы 1 этаж'
@@ -214,6 +223,7 @@
                   v-model="flatForm.house.number_of_lifts"
                   type="number"
                   label="Количество лифтов *"
+                  outlined
                   :rules="[
                     val => !!val || 'Обязательное поле',
                     val => val >= 1 || 'Должен быть хотя бы 1 лифт'
@@ -221,15 +231,27 @@
                 />
               </div>
             </div>
-
-            <q-card-actions align="right">
-              <q-btn flat label="Отмена" color="primary" v-close-popup />
-              <q-btn type="submit" :label="editingFlat ? 'Сохранить' : 'Добавить'" color="primary" />
+            
+            <q-card-actions align="right" class="q-px-none q-pt-lg">
+              <q-btn 
+                flat 
+                label="Отмена" 
+                color="primary" 
+                v-close-popup 
+                class="q-mr-md"
+              />
+              <q-btn 
+                type="submit" 
+                :label="editingFlat ? 'Сохранить' : 'Добавить'" 
+                color="primary" 
+                :loading="saving"
+              />
             </q-card-actions>
           </q-form>
         </q-card-section>
       </q-card>
     </q-dialog>
+
 
     <!-- Диалог удаления по отделке -->
     <q-dialog v-model="showDeleteByFurnishDialog">
@@ -251,6 +273,121 @@
         <q-card-actions align="right">
           <q-btn flat label="Отмена" color="primary" v-close-popup />
           <q-btn flat label="Удалить" color="negative" @click="confirmDeleteByFurnish" />
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
+
+    <q-dialog v-model="showFlatViewDialog" persistent>
+      <q-card style="min-width: 60%; max-width: 700px">
+        <q-card-section class="bg-primary text-white">
+          <div class="text-h6">Информация о квартире #{{ viewedFlat?.id }}</div>
+        </q-card-section>
+
+        <q-card-section class="q-pt-lg scroll" style="max-height: 70vh">
+          <div v-if="viewedFlat" class="q-gutter-y-md">
+            <!-- Основная информация -->
+            <div class="row q-col-gutter-md">
+              <div class="col-12">
+                <div class="text-subtitle1 text-weight-medium q-pb-sm">Основная информация</div>
+                <q-separator />
+              </div>
+              
+              <div class="col-12 col-sm-6">
+                <div class="text-caption text-grey-7">Название</div>
+                <div class="text-body1">{{ viewedFlat.name }}</div>
+              </div>
+              <div class="col-12 col-sm-6">
+                <div class="text-caption text-grey-7">Площадь</div>
+                <div class="text-body1">{{ viewedFlat.area }} м²</div>
+              </div>
+              <div class="col-12 col-sm-6">
+                <div class="text-caption text-grey-7">Количество комнат</div>
+                <div class="text-body1">{{ viewedFlat.number_of_rooms }}</div>
+              </div>
+              <div class="col-12 col-sm-6">
+                <div class="text-caption text-grey-7">Жилая площадь</div>
+                <div class="text-body1">{{ viewedFlat.living_space }} м²</div>
+              </div>
+              <div class="col-12 col-sm-6">
+                <div class="text-caption text-grey-7">Отделка</div>
+                <div class="text-body1">{{ getFurnishLabel(viewedFlat.furnish) }}</div>
+              </div>
+              <div class="col-12 col-sm-6">
+                <div class="text-caption text-grey-7">Транспорт</div>
+                <div class="text-body1">{{ getTransportLabel(viewedFlat.transport) }}</div>
+              </div>
+              <div class="col-12 col-sm-6">
+                <div class="text-caption text-grey-7">Балкон</div>
+                <div class="text-body1">{{ viewedFlat.balcony ? 'Да' : 'Нет' }}</div>
+              </div>
+              <div class="col-12 col-sm-6">
+                <div class="text-caption text-grey-7">Дата создания</div>
+                <div class="text-body1">{{ formatDate(viewedFlat.creationDate) }}</div>
+              </div>
+            </div>
+            
+            <!-- Координаты -->
+            <div class="row q-col-gutter-md q-mt-md">
+              <div class="col-12">
+                <div class="text-subtitle1 text-weight-medium q-pb-sm">Координаты</div>
+                <q-separator />
+              </div>
+              
+              <div class="col-12 col-sm-6">
+                <div class="text-caption text-grey-7">Координата X</div>
+                <div class="text-body1">{{ viewedFlat.coordinates.x }}</div>
+              </div>
+              <div class="col-12 col-sm-6">
+                <div class="text-caption text-grey-7">Координата Y</div>
+                <div class="text-body1">{{ viewedFlat.coordinates.y }}</div>
+              </div>
+            </div>
+            
+            <!-- Дом -->
+            <div class="row q-col-gutter-md q-mt-md">
+              <div class="col-12">
+                <div class="text-subtitle1 text-weight-medium q-pb-sm">Информация о доме</div>
+                <q-separator />
+              </div>
+              
+              <div class="col-12 col-sm-6">
+                <div class="text-caption text-grey-7">Название дома</div>
+                <div class="text-body1">{{ viewedFlat.house.name }}</div>
+              </div>
+              <div class="col-12 col-sm-6">
+                <div class="text-caption text-grey-7">Год постройки</div>
+                <div class="text-body1">{{ viewedFlat.house.year }}</div>
+              </div>
+              <div class="col-12 col-sm-6">
+                <div class="text-caption text-grey-7">Количество этажей</div>
+                <div class="text-body1">{{ viewedFlat.house.number_of_floors }}</div>
+              </div>
+              <div class="col-12 col-sm-6">
+                <div class="text-caption text-grey-7">Количество лифтов</div>
+                <div class="text-body1">{{ viewedFlat.house.number_of_lifts }}</div>
+              </div>
+            </div>
+          </div>
+          
+          <div v-else class="text-center q-pa-lg">
+            <q-spinner-hourglass color="primary" size="2em" />
+            <div class="q-mt-md">Загрузка данных...</div>
+          </div>
+        </q-card-section>
+
+        <q-card-actions align="right" class="q-pa-md">
+          <q-btn 
+            flat 
+            label="Закрыть" 
+            color="primary" 
+            v-close-popup 
+          />
+          <q-btn 
+            v-if="viewedFlat"
+            label="Редактировать" 
+            color="primary" 
+            @click="editViewedFlat"
+          />
         </q-card-actions>
       </q-card>
     </q-dialog>
@@ -295,6 +432,12 @@ const transportOptions = [
 ]
 
 // Реактивные данные
+const jobLoading = ref(false)
+const uniqueSpacesResult = ref(null)
+const flatId = ref(null)
+const showFlatViewDialog = ref(false)
+const viewedFlat = ref(null)
+const loadingFlat = ref(false)
 const flats = ref([])
 const loading = ref(false)
 const showAddDialog = ref(false)
@@ -450,22 +593,6 @@ const deleteFlat = async (id) => {
   })
 }
 
-// Получение уникальных значений жилой площади
-const getUniqueLivingSpaces = async () => {
-  try {
-    const response = await flatsApi.getUniqueLivingSpaces()
-    $q.dialog({
-      title: 'Уникальные значения жилой площади',
-      message: response.data.join(', ')
-    })
-  } catch (error) {
-    $q.notify({
-      type: 'negative',
-      message: 'Ошибка при получении уникальных значений: ' + error.message
-    })
-  }
-}
-
 // Удаление по отделке
 const confirmDeleteByFurnish = async () => {
   if (!deleteFurnish.value) {
@@ -522,6 +649,168 @@ const resetForm = () => {
     }
   }
   editingFlat.value = null
+}
+const getFlatById = async () => {
+  if (!flatId.value) {
+    $q.notify({
+      type: 'warning',
+      message: 'Введите ID квартиры',
+      position: 'top'
+    })
+    return
+  }
+
+  loadingFlat.value = true
+  try {
+    const response = await flatsApi.getFlatById(flatId.value)
+    viewedFlat.value = response.data
+    showFlatViewDialog.value = true
+  } catch (error) {
+    $q.notify({
+      type: 'negative',
+      message: 'Ошибка при получении квартиры: ' + error.message,
+      position: 'top'
+    })
+  } finally {
+    loadingFlat.value = false
+  }
+}
+
+// Метод для удаления квартиры по ID
+const deleteFlatById = async () => {
+  if (!flatId.value) {
+    $q.notify({
+      type: 'warning',
+      message: 'Введите ID квартиры',
+      position: 'top'
+    })
+    return
+  }
+
+  $q.dialog({
+    title: 'Подтверждение удаления',
+    message: `Вы уверены, что хотите удалить квартиру с ID ${flatId.value}?`,
+    cancel: true,
+    persistent: true
+  }).onOk(async () => {
+    try {
+      await flatsApi.deleteFlat(flatId.value)
+      $q.notify({
+        type: 'positive',
+        message: 'Квартира успешно удалена',
+        position: 'top'
+      })
+      flatId.value = null
+      loadFlats() // Перезагружаем список квартир
+    } catch (error) {
+      $q.notify({
+        type: 'negative',
+        message: 'Ошибка при удалении квартиры: ' + error.message,
+        position: 'top'
+      })
+    }
+  })
+}
+
+// Метод для редактирования просматриваемой квартиры
+const editViewedFlat = () => {
+  if (viewedFlat.value) {
+    editingFlat.value = viewedFlat.value.id
+    flatForm.value = { ...viewedFlat.value }
+    showFlatViewDialog.value = false
+    showAddDialog.value = true
+  }
+}
+
+// Вспомогательные методы для отображения
+const getFurnishLabel = (value) => {
+  const option = furnishOptions.find(opt => opt.value === value)
+  return option ? option.label : value
+}
+
+const getTransportLabel = (value) => {
+  const option = transportOptions.find(opt => opt.value === value)
+  return option ? option.label : value
+}
+
+const formatDate = (dateString) => {
+  if (!dateString) return 'Не указана'
+  return new Date(dateString).toLocaleDateString('ru-RU')
+}
+
+const launchUniqueLivingSpacesJob = async () => {
+  jobLoading.value = true
+  try {
+    await flatsApi.launchUniqueLivingSpacesJob()
+    $q.notify({
+      type: 'positive',
+      message: 'Задача по поиску уникальных значений жилой площади запущена',
+      position: 'top'
+    })
+    // Сбрасываем предыдущий результат, так как запускаем новую задачу
+    uniqueSpacesResult.value = null
+  } catch (error) {
+    console.error('Ошибка при запуске задачи:', error)
+    $q.notify({
+      type: 'negative',
+      message: 'Ошибка при запуске задачи: ' + error.message,
+      position: 'top'
+    })
+  } finally {
+    jobLoading.value = false
+  }
+}
+
+// Метод для получения результата (GET)
+const getUniqueLivingSpaces = async () => {
+  try {
+    const response = await flatsApi.getUniqueLivingSpaces()
+    uniqueSpacesResult.value = response.data
+    
+    if (uniqueSpacesResult.value && uniqueSpacesResult.value.length > 0) {
+      $q.dialog({
+        title: 'Уникальные значения жилой площади',
+        message: uniqueSpacesResult.value.join(', '),
+        ok: {
+          label: 'Закрыть',
+          color: 'primary'
+        }
+      })
+    } else {
+      $q.notify({
+        type: 'info',
+        message: 'Результат пока не доступен или пуст',
+        position: 'top'
+      })
+    }
+  } catch (error) {
+    console.error('Ошибка при получении уникальных значений:', error)
+    $q.notify({
+      type: 'negative',
+      message: 'Ошибка при получении результата: ' + error.message,
+      position: 'top'
+    })
+  }
+}
+
+// Метод для отмены задачи
+const cancelUniqueLivingSpacesJob = async () => {
+  try {
+    await flatsApi.cancelUniqueLivingSpacesJob()
+    $q.notify({
+      type: 'positive',
+      message: 'Задача по поиску уникальных значений жилой площади отменена',
+      position: 'top'
+    })
+    uniqueSpacesResult.value = null
+  } catch (error) {
+    console.error('Ошибка при отмене задачи:', error)
+    $q.notify({
+      type: 'negative',
+      message: 'Ошибка при отмене задачи: ' + error.message,
+      position: 'top'
+    })
+  }
 }
 
 // Загрузка при монтировании

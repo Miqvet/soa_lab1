@@ -10,26 +10,9 @@ const api = axios.create({
 })
 
 export const flatsApi = {
-  // Получить все квартиры с фильтрацией
-  getFlats: (filters, pagination, sort) => {
-    const params = {
-      page: pagination.page || 0,
-      size: pagination.rowsPerPage || 20,
-      sortBy: sort.sortBy || 'id',
-      sortDirection: sort.descending ? 'desc' : 'asc',
-    }
-
-    return api.post('/api/flats/filtered', filters, { params })
-  },
-
   // Получить квартиру по ID
   getFlatById: (id) => {
     return api.get(`/api/flats/${id}`)
-  },
-
-  // Создать новую квартиру
-  createFlat: (flatData) => {
-    return api.post('/api/flats', flatData)
   },
 
   // Обновить квартиру
@@ -42,18 +25,45 @@ export const flatsApi = {
     return api.delete(`/api/flats/${id}`)
   },
 
-  // Получить уникальные значения жилой площади
+  // Создать новую квартиру
+  createFlat: (flatData) => {
+    return api.post('/api/flats', flatData)
+  },
+
+  // Получить уникальные значения жилой площади get(Статус джоба)
   getUniqueLivingSpaces: () => {
-    return api.get('/api/flats/unique_living_spaces')
+    return api.get('/api/flats/unique-living-spaces')
+  },
+
+  // Получить уникальные значения жилой площади post(Начать асинхр задачу)
+  getUniqueLivingSpaces: () => {
+    return api.post('/api/flats/unique-living-spaces')
+  },
+
+  // Получить уникальные значения жилой площади delete(Остановить задачу)
+  getUniqueLivingSpaces: () => {
+    return api.delete('/api/flats/unique-living-spaces')
+  },
+
+  // Получить все квартиры с фильтрацией
+  getFlats: (filters, pagination, sort) => {
+    const params = {
+      page: pagination.page || 0,
+      size: pagination.rowsPerPage || 20,
+      sortBy: sort.sortBy || 'id',
+      sortDirection: sort.descending ? 'desc' : 'asc',
+    }
+
+    return api.post('/api/flats/filter', filters, { params })
   },
 
   // Получить квартиры с количеством комнат больше указанного
   getFlatsWithMoreRooms: (rooms) => {
-    return api.get(`/api/flats/rooms_greater_than/${rooms}`)
+    return api.get(`/api/flats/rooms-greater-than/${rooms}`)
   },
 
   // Удалить квартиры по типу отделки
   deleteByFurnish: (furnish) => {
-    return api.delete(`/api/flats/by_furnish/${furnish}`)
+    return api.delete(`/api/flats/by-furnish/${furnish}`)
   },
 }

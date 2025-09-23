@@ -1,16 +1,22 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import FlatsPage from '../pages/FlatsPage.vue'
+import FlatsListPage from '../pages/FlatsListPage.vue'
 import AgencyPage from '../pages/AgencyPage.vue'
 
 const routes = [
   {
     path: '/',
-    redirect: '/flats'
+    redirect: '/flat'
+  },
+  {
+    path: '/flat',
+    name: 'Flat',
+    component: FlatsPage
   },
   {
     path: '/flats',
     name: 'Flats',
-    component: FlatsPage
+    component: FlatsListPage
   },
   {
     path: '/agency',

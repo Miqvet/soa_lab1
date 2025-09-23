@@ -2,14 +2,14 @@
   <q-layout view="hHh lpR fFf">
     <q-header elevated class="bg-primary text-white">
       <q-toolbar>
-        <q-toolbar-title>
-          Real Estate App
+        <q-toolbar-title align="center">
+        Flat manager
         </q-toolbar-title>
-        <q-btn flat round dense icon="menu" class="q-mr-xs" />
       </q-toolbar>
 
       <q-tabs align="center">
-        <q-route-tab to="/flats" label="Квартиры" />
+        <q-route-tab to="/flat" label="Квартиры" />
+        <q-route-tab to="/flats" label="Список квартир" />
         <q-route-tab to="/agency" label="Агентство" />
       </q-tabs>
     </q-header>
