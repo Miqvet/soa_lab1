@@ -9,10 +9,15 @@ spring:
     password: example
     driver-class-name: org.postgresql.Driver
 
-    jpa:
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    generate-ddl: true
+    show-sql: true
+    properties:
       hibernate:
-        ddl-auto: create-drop  # или update для продакшена
-      show-sql: true
+        format_sql: true
+        dialect: org.hibernate.dialect.PostgreSQLDialect
 
 logging:
   level:
