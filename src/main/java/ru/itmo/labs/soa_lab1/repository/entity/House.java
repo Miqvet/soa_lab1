@@ -43,7 +43,7 @@ public class House {
     @Schema(title = "Год", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotNull(message = "Год не может быть null")
     @Min(value = 1, message = "Год должен быть больше 0")
-    @Max(value = 370, message = "Год не может превышать 370")
+    @Max(value = 2025, message = "Год не может превышать 370")
     private Long year;
 
     @JsonProperty("number_of_floors")

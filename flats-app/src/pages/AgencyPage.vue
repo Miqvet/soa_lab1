@@ -1,151 +1,1 @@
-<template>
-  <q-page class="q-pa-md">
-    <div class="text-h4 q-mb-md">Операции агентства</div>
-
-    <!-- Поиск самой дорогой квартиры из трех -->
-    <q-card class="q-mb-md">
-      <q-card-section>
-        <div class="text-h6">Найти самую дорогую квартиру из трех</div>
-        <q-form @submit="findMostExpensive" class="q-gutter-pa-md">
-          <div class="row q-col-gutter-md">
-            <div class="col-12 col-sm-4">
-              <q-input
-                v-model="expensiveIds.id1"
-                type="number"
-                label="ID квартиры 1"
-                :rules="[val => !!val || 'Обязательное поле']"
-              />
-            </div>
-            <div class="col-12 col-sm-4">
-              <q-input
-                v-model="expensiveIds.id2"
-                type="number"
-                label="ID квартиры 2"
-                :rules="[val => !!val || 'Обязательное поле']"
-              />
-            </div>
-            <div class="col-12 col-sm-4">
-              <q-input
-                v-model="expensiveIds.id3"
-                type="number"
-                label="ID квартиры 3"
-                :rules="[val => !!val || 'Обязательное поле']"
-              />
-            </div>
-            <div class="col-12">
-              <q-btn label="Найти" type="submit" color="primary" />
-            </div>
-          </div>
-        </q-form>
-
-        <div v-if="mostExpensiveFlat" class="q-mt-md">
-          <div class="text-subtitle1">Самая дорогая квартира:</div>
-          <pre>{{ JSON.stringify(mostExpensiveFlat, null, 2) }}</pre>
-        </div>
-      </q-card-section>
-    </q-card>
-
-    <!-- Поиск квартиры с балконом -->
-    <q-card>
-      <q-card-section>
-        <div class="text-h6">Найти квартиру с балконом</div>
-        <q-form @submit="findBalconyFlat" class="q-gutter-pa-md">
-          <div class="row q-col-gutter-md">
-            <div class="col-12 col-sm-6">
-              <q-select
-                v-model="balconyParams.cheapest"
-                :options="[
-                  { label: 'Самая дешевая', value: true },
-                  { label: 'Самая дорогая', value: false }
-                ]"
-                label="Тип поиска"
-                emit-value
-                map-options
-                :rules="[val => val !== null || 'Обязательное поле']"
-              />
-            </div>
-            <div class="col-12 col-sm-6">
-              <q-select
-                v-model="balconyParams.withBalcony"
-                :options="[
-                  { label: 'С балконом', value: true },
-                  { label: 'Без балкона', value: false }
-                ]"
-                label="Наличие балкона"
-                emit-value
-                map-options
-                :rules="[val => val !== null || 'Обязательное поле']"
-              />
-            </div>
-            <div class="col-12">
-              <q-btn label="Найти" type="submit" color="primary" />
-            </div>
-          </div>
-        </q-form>
-
-        <div v-if="balconyFlat" class="q-mt-md">
-          <div class="text-subtitle1">Найденная квартира:</div>
-          <pre>{{ JSON.stringify(balconyFlat, null, 2) }}</pre>
-        </div>
-      </q-card-section>
-    </q-card>
-  </q-page>
-</template>
-
-<script setup>
-import { ref } from 'vue'
-import { useQuasar } from 'quasar'
-import { agencyApi } from '../api/agency.js'
-
-const $q = useQuasar()
-
-// Данные для формы поиска самой дорогой квартиры
-const expensiveIds = ref({
-  id1: null,
-  id2: null,
-  id3: null
-})
-
-const mostExpensiveFlat = ref(null)
-
-// Данные для формы поиска квартиры с балконом
-const balconyParams = ref({
-  cheapest: null,
-  withBalcony: null
-})
-
-const balconyFlat = ref(null)
-
-// Поиск самой дорогой квартиры
-const findMostExpensive = async () => {
-  try {
-    const response = await agencyApi.getMostExpensive(
-      expensiveIds.value.id1,
-      expensiveIds.value.id2,
-      expensiveIds.value.id3
-    )
-    mostExpensiveFlat.value = response.data
-  } catch (error) {
-    $q.notify({
-      type: 'negative',
-      message: 'Ошибка при поиске самой дорогой квартиры: ' + error.message
-    })
-  }
-}
-
-// Поиск квартиры с балконом
-const findBalconyFlat = async () => {
-  try {
-    const response = await agencyApi.findWithBalcony(
-      balconyParams.value.cheapest,
-      balconyParams.value.withBalcony
-    )
-    balconyFlat.value = response.data
-  } catch (error) {
-    $q.notify({
-      type: 'negative',
-      message: 'Ошибка при поиске квартиры: ' + error.message
-    })
-  }
-}
-</script>
+<template>  <q-page class="q-pa-md">    <div class="text-h4 q-mb-md">Операции агентства</div>    <!-- Поиск самой дорогой квартиры из трех -->    <q-card class="q-mb-md">      <q-card-section>        <div class="text-h6">Найти самую дорогую квартиру из трех</div>        <q-form @submit="findMostExpensive" class="q-gutter-pa-md">          <div class="row q-col-gutter-md">            <div class="col-12 col-sm-4">              <q-input                v-model="expensiveIds.id1"                type="number"                label="ID квартиры 1"                outlined                :rules="[val => !!val || 'Обязательное поле']"              />            </div>            <div class="col-12 col-sm-4">              <q-input                v-model="expensiveIds.id2"                type="number"                label="ID квартиры 2"                :rules="[val => !!val || 'Обязательное поле']"              />            </div>            <div class="col-12 col-sm-4">              <q-input                v-model="expensiveIds.id3"                type="number"                label="ID квартиры 3"                outlined                :rules="[val => !!val || 'Обязательное поле']"              />            </div>            <div class="col-12">              <q-btn label="Найти" type="submit" color="primary" :loading="loadingMostExpensive" />            </div>          </div>        </q-form>      </q-card-section>    </q-card>    <!-- Поиск квартиры с балконом -->    <q-card>      <q-card-section>        <div class="text-h6">Найти квартиру с балконом</div>        <q-form @submit="findBalconyFlat" class="q-gutter-pa-md">          <div class="row q-col-gutter-md">            <div class="col-12 col-sm-6">              <q-select                v-model="balconyParams.cheapest"                :options="[                  { label: 'Самая дешевая', value: true },                  { label: 'Самая дорогая', value: false }                ]"                label="Тип поиска"                outlined                emit-value                map-options                :rules="[val => val !== null || 'Обязательное поле']"              />            </div>            <div class="col-12 col-sm-6">              <q-select                v-model="balconyParams.withBalcony"                :options="[                  { label: 'С балконом', value: true },                  { label: 'Без балкона', value: false }                ]"                label="Наличие балкона"                outlined                emit-value                map-options                :rules="[val => val !== null || 'Обязательное поле']"              />            </div>            <div class="col-12">              <q-btn label="Найти" type="submit" color="primary" :loading="loadingBalcony" />            </div>          </div>        </q-form>      </q-card-section>    </q-card>    <!-- Диалог просмотра квартиры -->    <q-dialog v-model="showFlatViewDialog">      <q-card style="min-width: 60%; max-width: 700px">        <q-card-section class="bg-primary text-white">          <div class="text-h6">Информация о квартире #{{ viewedFlat?.id }}</div>        </q-card-section>        <q-card-section class="q-pt-lg scroll" style="max-height: 70vh">          <div v-if="viewedFlat" class="q-gutter-pa-y-md">            <!-- Основная информация -->            <div class="row q-col-gutter-pa-md">              <div class="col-12">                <div class="text-subtitle1 text-weight-medium q-pb-sm">Основная информация</div>                <q-separator />              </div>              <div class="col-12 col-sm-6">                <div class="text-caption text-grey-7">Название</div>                <div class="text-body1">{{ viewedFlat.name }}</div>              </div>              <div class="col-12 col-sm-6">                <div class="text-caption text-grey-7">Площадь</div>                <div class="text-body1">{{ viewedFlat.area }} м²</div>              </div>              <div class="col-12 col-sm-6">                <div class="text-caption text-grey-7">Количество комнат</div>                <div class="text-body1">{{ viewedFlat.number_of_rooms }}</div>              </div>              <div class="col-12 col-sm-6">                <div class="text-caption text-grey-7">Жилая площадь</div>                <div class="text-body1">{{ viewedFlat.living_space }} м²</div>              </div>              <div class="col-12 col-sm-6">                <div class="text-caption text-grey-7">Отделка</div>                <div class="text-body1">{{ getFurnishLabel(viewedFlat.furnish) }}</div>              </div>              <div class="col-12 col-sm-6">                <div class="text-caption text-grey-7">Транспорт</div>                <div class="text-body1">{{ getTransportLabel(viewedFlat.transport) }}</div>              </div>              <div class="col-12 col-sm-6">                <div class="text-caption text-grey-7">Балкон</div>                <div class="text-body1">{{ viewedFlat.balcony ? 'Да' : 'Нет' }}</div>              </div>              <div class="col-12 col-sm-6">                <div class="text-caption text-grey-7">Дата создания</div>                <div class="text-body1">{{ formatDate(viewedFlat.creationDate) }}</div>              </div>            </div>            <!-- Координаты -->            <div class="row q-col-gutter-pa-md q-mt-md">              <div class="col-12">                <div class="text-subtitle1 text-weight-medium q-pb-sm">Координаты</div>                <q-separator />              </div>              <div class="col-12 col-sm-6">                <div class="text-caption text-grey-7">Координата X</div>                <div class="text-body1">{{ viewedFlat.coordinates.x }}</div>              </div>              <div class="col-12 col-sm-6">                <div class="text-caption text-grey-7">Координата Y</div>                <div class="text-body1">{{ viewedFlat.coordinates.y }}</div>              </div>            </div>            <!-- Дом -->            <div class="row q-col-gutter-md q-mt-md">              <div class="col-12">                <div class="text-subtitle1 text-weight-medium q-pb-sm">Информация о доме</div>                <q-separator />              </div>              <div class="col-12 col-sm-6">                <div class="text-caption text-grey-7">Название дома</div>                <div class="text-body1">{{ viewedFlat.house.name }}</div>              </div>              <div class="col-12 col-sm-6">                <div class="text-caption text-grey-7">Год постройки</div>                <div class="text-body1">{{ viewedFlat.house.year }}</div>              </div>              <div class="col-12 col-sm-6">                <div class="text-caption text-grey-7">Количество этажей</div>                <div class="text-body1">{{ viewedFlat.house.number_of_floors }}</div>              </div>              <div class="col-12 col-sm-6">                <div class="text-caption text-grey-7">Количество лифтов</div>                <div class="text-body1">{{ viewedFlat.house.number_of_lifts }}</div>              </div>            </div>          </div>          <div v-else class="text-center q-pa-lg">            <q-spinner-hourglass color="primary" size="2em" />            <div class="q-mt-md">Загрузка данных...</div>          </div>        </q-card-section>        <q-card-actions align="right" class="q-pa-md">          <q-btn            flat            label="Закрыть"            color="primary"            v-close-popup          />        </q-card-actions>      </q-card>    </q-dialog>  </q-page></template><script setup>import { ref } from 'vue'import { useQuasar } from 'quasar'import { agencyApi } from '../api/agency.js'const $q = useQuasar()// Данные для формы поиска самой дорогой квартирыconst expensiveIds = ref({  id1: null,  id2: null,  id3: null})// Данные для формы поиска квартиры с балкономconst balconyParams = ref({  cheapest: null,  withBalcony: null})// Данные для диалогового окнаconst showFlatViewDialog = ref(false)const viewedFlat = ref(null)const loadingMostExpensive = ref(false)const loadingBalcony = ref(false)// Опции для селектов (можно вынести в отдельный файл)const furnishOptions = [  { label: 'DESIGNER', value: 'DESIGNER' },  { label: 'NONE', value: 'NONE' },  { label: 'FINE', value: 'FINE' },  { label: 'BAD', value: 'BAD' },  { label: 'LITTLE', value: 'LITTLE' }]const transportOptions = [  { label: 'FEW', value: 'FEW' },  { label: 'NONE', value: 'NONE' },  { label: 'LITTLE', value: 'LITTLE' },  { label: 'ENOUGH', value: 'ENOUGH' }]// Вспомогательные методы для отображенияconst getFurnishLabel = (value) => {  const option = furnishOptions.find(opt => opt.value === value)  return option ? option.label : value}const getTransportLabel = (value) => {  const option = transportOptions.find(opt => opt.value === value)  return option ? option.label : value}const formatDate = (dateString) => {  if (!dateString) return 'Не указана'  return new Date(dateString).toLocaleDateString('ru-RU')}// Поиск самой дорогой квартирыconst findMostExpensive = async () => {  loadingMostExpensive.value = true  try {    const response = await agencyApi.getMostExpensive(      expensiveIds.value.id1,      expensiveIds.value.id2,      expensiveIds.value.id3    )    viewedFlat.value = response.data    showFlatViewDialog.value = true    $q.notify({      type: 'positive',      message: 'Квартира найдена',      position: 'top'    })  } catch (error) {    $q.notify({      type: 'negative',      message: 'Ошибка при поиске самой дорогой квартиры: ' + error.message,      position: 'top'    })  } finally {    loadingMostExpensive.value = false  }}// Поиск квартиры с балкономconst findBalconyFlat = async () => {  loadingBalcony.value = true  try {    const response = await agencyApi.findWithBalcony(      balconyParams.value.cheapest,      balconyParams.value.withBalcony    )    viewedFlat.value = response.data    showFlatViewDialog.value = true    $q.notify({      type: 'positive',      message: 'Квартира найдена',      position: 'top'    })  } catch (error) {    $q.notify({      type: 'negative',      message: 'Ошибка при поиске квартиры: ' + error.message,      position: 'top'    })  } finally {    loadingBalcony.value = false  }}</script>

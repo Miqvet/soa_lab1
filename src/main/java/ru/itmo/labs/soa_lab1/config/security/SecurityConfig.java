@@ -15,6 +15,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.web.cors.CorsConfiguration;
 
 import java.util.List;
 
@@ -26,27 +27,36 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
         return httpSecurity
-            .csrf(AbstractHttpConfigurer::disable)
-            .authorizeHttpRequests(authorize -> authorize
-                .requestMatchers("/swagger-ui/**", "/swagger-resources/*", "/v3/api-docs/**", "/v3/api-docs.yaml").permitAll()
-                .requestMatchers("/api/**").permitAll())
-            .httpBasic(Customizer.withDefaults())
-            .sessionManagement(conf -> conf.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            .build();
+                .csrf(AbstractHttpConfigurer::disable)
+                .cors(cors -> cors.configurationSource(request -> {
+                    CorsConfiguration config = new CorsConfiguration();
+                    config.setAllowedOriginPatterns(List.of("*")); // Для всех origin
+                    config.setAllowedMethods(List.of("*")); // Все методы (GET, POST и т.д.)
+                    config.setAllowedHeaders(List.of("*")); // Все заголовки
+                    config.setAllowCredentials(false); // Если не нужны куки
+                    return config;
+                }))
+                .authorizeHttpRequests(authorize -> authorize
+                        .requestMatchers("/swagger-ui/**", "/swagger-resources/*", "/v3/api-docs/**", "/v3/api-docs.yaml").permitAll()
+                        .requestMatchers("/api/**").permitAll())
+                .httpBasic(Customizer.withDefaults())
+                .sessionManagement(conf -> conf.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .build();
     }
 
     @Bean
     public UserDetailsService userDetailsService(@Value("${api.auth.users}") String users,
                                                  PasswordEncoder passwordEncoder,
                                                  ObjectMapper objectMapper) throws Exception {
-        var appUsers = objectMapper.readValue(users, new TypeReference<List<AppUser>>() {});
+        var appUsers = objectMapper.readValue(users, new TypeReference<List<AppUser>>() {
+        });
         var userDetails = appUsers.stream()
-            .map(user -> User.builder()
-                .username(user.username())
-                .password(passwordEncoder.encode(user.password()))
-                .roles(user.roles().toArray(String[]::new))
-                .build())
-            .toList();
+                .map(user -> User.builder()
+                        .username(user.username())
+                        .password(passwordEncoder.encode(user.password()))
+                        .roles(user.roles().toArray(String[]::new))
+                        .build())
+                .toList();
         return new InMemoryUserDetailsManager(userDetails);
     }
 

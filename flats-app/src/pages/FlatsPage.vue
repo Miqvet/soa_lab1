@@ -277,6 +277,7 @@
       </q-card>
     </q-dialog>
 
+    <!-- Диалог просмотра квартиры -->
     <q-dialog v-model="showFlatViewDialog" persistent>
       <q-card style="min-width: 60%; max-width: 700px">
         <q-card-section class="bg-primary text-white">
@@ -650,6 +651,8 @@ const resetForm = () => {
   }
   editingFlat.value = null
 }
+
+// Получение квартиры по ID
 const getFlatById = async () => {
   if (!flatId.value) {
     $q.notify({
