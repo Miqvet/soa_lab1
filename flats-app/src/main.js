@@ -1,6 +1,6 @@
 import { createApp } from 'vue'
 import App from './App.vue'
-import { Quasar } from 'quasar'
+import { Quasar, Notify, Dialog } from 'quasar' // Добавляем импорт плагинов
 import quasarLang from 'quasar/lang/ru'
 import quasarIconSet from 'quasar/icon-set/material-icons'
 
@@ -15,6 +15,10 @@ const app = createApp(App)
 app.use(Quasar, {
   lang: quasarLang,
   iconSet: quasarIconSet,
+  plugins: {
+    Notify, // Добавляем плагин уведомлений
+    Dialog  // Добавляем плагин диалогов (если используете)
+  }
 })
 
 app.use(router)

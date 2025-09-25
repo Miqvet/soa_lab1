@@ -38,27 +38,4 @@ public class AgencyService {
         return flats.stream()
                 .max(Comparator.comparingDouble(Flat::getPrice));
     }
-
-    public Map<String, Object> getPriceStatistics(boolean withBalcony) {
-        List<Flat> flats = flatRepository.findByHasBalcony(withBalcony);
-        
-        if (flats.isEmpty()) {
-            return Map.of(
-                "count", 0,
-                "message", "No flats found"
-            );
-        }
-        
-        DoubleSummaryStatistics stats = flats.stream()
-                .mapToDouble(Flat::getPrice)
-                .summaryStatistics();
-        
-        return Map.of(
-            "count", stats.getCount(),
-            "minPrice", stats.getMin(),
-            "maxPrice", stats.getMax(),
-            "averagePrice", stats.getAverage(),
-            "totalPrice", stats.getSum()
-        );
-    }
 }
