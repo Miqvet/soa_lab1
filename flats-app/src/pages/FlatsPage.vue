@@ -507,10 +507,25 @@ const loadFlats = async (props = {}) => {
     pagination.value.sortBy = sortBy
     pagination.value.descending = descending
   } catch (error) {
-    $q.notify({
-      type: 'negative',
-      message: 'Ошибка при загрузке квартир: ' + error.message
-    })
+          let errorMessage = 'Неизвестная ошибка'
+              if (error.response && error.response.data) {
+                const errorData = error.response.data
+                if (errorData.message) {
+                  errorMessage = errorData.message + '. '
+                  if (errorData.errors && errorData.errors.length > 0) {
+                    errorMessage += errorData.errors.join(', ')
+                  }
+                } else {
+                  errorMessage = errorData.message || JSON.stringify(errorData)
+                }
+              } else if (error.message) {
+                errorMessage = error.message
+              }
+              $q.notify({
+                type: 'negative',
+                message: errorMessage,
+                position: 'top'
+              })
   } finally {
     loading.value = false
   }
@@ -563,11 +578,26 @@ const saveFlat = async () => {
     resetForm()
     loadFlats()
   } catch (error) {
-    $q.notify({
-      type: 'negative',
-      message: 'Ошибка при сохранении квартиры: ' + error.message
-    })
-  }
+          let errorMessage = 'Неизвестная ошибка'
+              if (error.response && error.response.data) {
+                const errorData = error.response.data
+                if (errorData.message) {
+                  errorMessage = errorData.message + '. '
+                  if (errorData.errors && errorData.errors.length > 0) {
+                    errorMessage += errorData.errors.join(', ')
+                  }
+                } else {
+                  errorMessage = errorData.message || JSON.stringify(errorData)
+                }
+              } else if (error.message) {
+                errorMessage = error.message
+              }
+              $q.notify({
+                type: 'negative',
+                message: errorMessage,
+                position: 'top'
+              })
+        }
 }
 
 // Удаление квартиры
@@ -586,11 +616,26 @@ const deleteFlat = async (id) => {
       })
       loadFlats()
     } catch (error) {
-      $q.notify({
-        type: 'negative',
-        message: 'Ошибка при удалении квартиры: ' + error.message
-      })
-    }
+            let errorMessage = 'Неизвестная ошибка'
+                if (error.response && error.response.data) {
+                  const errorData = error.response.data
+                  if (errorData.message) {
+                    errorMessage = errorData.message + '. '
+                    if (errorData.errors && errorData.errors.length > 0) {
+                      errorMessage += errorData.errors.join(', ')
+                    }
+                  } else {
+                    errorMessage = errorData.message || JSON.stringify(errorData)
+                  }
+                } else if (error.message) {
+                  errorMessage = error.message
+                }
+                $q.notify({
+                  type: 'negative',
+                  message: errorMessage,
+                  position: 'top'
+                })
+          }
   })
 }
 
@@ -620,11 +665,26 @@ const confirmDeleteByFurnish = async () => {
       deleteFurnish.value = null
       loadFlats()
     } catch (error) {
-      $q.notify({
-        type: 'negative',
-        message: 'Ошибка при удалении квартир: ' + error.message
-      })
-    }
+            let errorMessage = 'Неизвестная ошибка'
+                if (error.response && error.response.data) {
+                  const errorData = error.response.data
+                  if (errorData.message) {
+                    errorMessage = errorData.message + '. '
+                    if (errorData.errors && errorData.errors.length > 0) {
+                      errorMessage += errorData.errors.join(', ')
+                    }
+                  } else {
+                    errorMessage = errorData.message || JSON.stringify(errorData)
+                  }
+                } else if (error.message) {
+                  errorMessage = error.message
+                }
+                $q.notify({
+                  type: 'negative',
+                  message: errorMessage,
+                  position: 'top'
+                })
+          }
   })
 }
 
@@ -669,11 +729,25 @@ const getFlatById = async () => {
     viewedFlat.value = response.data
     showFlatViewDialog.value = true
   } catch (error) {
-    $q.notify({
-      type: 'negative',
-      message: 'Ошибка при получении квартиры: ' + error.message,
-      position: 'top'
-    })
+      let errorMessage = 'Неизвестная ошибка'
+           if (error.response && error.response.data) {
+              const errorData = error.response.data
+              if (errorData.message) {
+                errorMessage = errorData.message + '. '
+                if (errorData.errors && errorData.errors.length > 0) {
+                  errorMessage += errorData.errors.join(', ')
+                }
+              } else {
+                errorMessage = errorData.message || JSON.stringify(errorData)
+              }
+            } else if (error.message) {
+              errorMessage = error.message
+            }
+            $q.notify({
+              type: 'negative',
+              message: errorMessage,
+              position: 'top'
+            })
   } finally {
     loadingFlat.value = false
   }
@@ -706,12 +780,26 @@ const deleteFlatById = async () => {
       flatId.value = null
       loadFlats() // Перезагружаем список квартир
     } catch (error) {
-      $q.notify({
-        type: 'negative',
-        message: 'Ошибка при удалении квартиры: ' + error.message,
-        position: 'top'
-      })
-    }
+        let errorMessage = 'Неизвестная ошибка'
+            if (error.response && error.response.data) {
+              const errorData = error.response.data
+              if (errorData.message) {
+                errorMessage = errorData.message + '. '
+                if (errorData.errors && errorData.errors.length > 0) {
+                  errorMessage += errorData.errors.join(', ')
+                }
+              } else {
+                errorMessage = errorData.message || JSON.stringify(errorData)
+              }
+            } else if (error.message) {
+              errorMessage = error.message
+            }
+            $q.notify({
+              type: 'negative',
+              message: errorMessage,
+              position: 'top'
+            })
+      }
   })
 }
 
@@ -753,13 +841,26 @@ const launchUniqueLivingSpacesJob = async () => {
     // Сбрасываем предыдущий результат, так как запускаем новую задачу
     uniqueSpacesResult.value = null
   } catch (error) {
-    console.error('Ошибка при запуске задачи:', error)
-    $q.notify({
-      type: 'negative',
-      message: 'Ошибка при запуске задачи: ' + error.message,
-      position: 'top'
-    })
-  } finally {
+          let errorMessage = 'Неизвестная ошибка'
+              if (error.response && error.response.data) {
+                const errorData = error.response.data
+                if (errorData.message) {
+                  errorMessage = errorData.message + '. '
+                  if (errorData.errors && errorData.errors.length > 0) {
+                    errorMessage += errorData.errors.join(', ')
+                  }
+                } else {
+                  errorMessage = errorData.message || JSON.stringify(errorData)
+                }
+              } else if (error.message) {
+                errorMessage = error.message
+              }
+              $q.notify({
+                type: 'negative',
+                message: errorMessage,
+                position: 'top'
+              })
+        } finally {
     jobLoading.value = false
   }
 }
@@ -787,13 +888,26 @@ const getUniqueLivingSpaces = async () => {
       })
     }
   } catch (error) {
-    console.error('Ошибка при получении уникальных значений:', error)
-    $q.notify({
-      type: 'negative',
-      message: 'Ошибка при получении результата: ' + error.message,
-      position: 'top'
-    })
-  }
+          let errorMessage = 'Неизвестная ошибка'
+              if (error.response && error.response.data) {
+                const errorData = error.response.data
+                if (errorData.message) {
+                  errorMessage = errorData.message + '. '
+                  if (errorData.errors && errorData.errors.length > 0) {
+                    errorMessage += errorData.errors.join(', ')
+                  }
+                } else {
+                  errorMessage = errorData.message || JSON.stringify(errorData)
+                }
+              } else if (error.message) {
+                errorMessage = error.message
+              }
+              $q.notify({
+                type: 'negative',
+                message: errorMessage,
+                position: 'top'
+              })
+        }
 }
 
 // Метод для отмены задачи
@@ -807,13 +921,26 @@ const cancelUniqueLivingSpacesJob = async () => {
     })
     uniqueSpacesResult.value = null
   } catch (error) {
-    console.error('Ошибка при отмене задачи:', error)
-    $q.notify({
-      type: 'negative',
-      message: 'Ошибка при отмене задачи: ' + error.message,
-      position: 'top'
-    })
-  }
+          let errorMessage = 'Неизвестная ошибка'
+              if (error.response && error.response.data) {
+                const errorData = error.response.data
+                if (errorData.message) {
+                  errorMessage = errorData.message + '. '
+                  if (errorData.errors && errorData.errors.length > 0) {
+                    errorMessage += errorData.errors.join(', ')
+                  }
+                } else {
+                  errorMessage = errorData.message || JSON.stringify(errorData)
+                }
+              } else if (error.message) {
+                errorMessage = error.message
+              }
+              $q.notify({
+                type: 'negative',
+                message: errorMessage,
+                position: 'top'
+              })
+        }
 }
 
 // Загрузка при монтировании

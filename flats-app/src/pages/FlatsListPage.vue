@@ -369,11 +369,26 @@ const loadFlats = async (props = {}) => {
     pagination.value.sortBy = sortBy
     pagination.value.descending = descending
   } catch (error) {
-    $q.notify({
-      type: 'negative',
-      message: 'Ошибка при загрузке квартир: ' + error.message
-    })
-  } finally {
+          let errorMessage = 'Неизвестная ошибка'
+              if (error.response && error.response.data) {
+                const errorData = error.response.data
+                if (errorData.message) {
+                  errorMessage = errorData.message + '. '
+                  if (errorData.errors && errorData.errors.length > 0) {
+                    errorMessage += errorData.errors.join(', ')
+                  }
+                } else {
+                  errorMessage = errorData.message || JSON.stringify(errorData)
+                }
+              } else if (error.message) {
+                errorMessage = error.message
+              }
+              $q.notify({
+                type: 'negative',
+                message: errorMessage,
+                position: 'top'
+              })
+        } finally {
     loading.value = false
   }
 }
@@ -425,11 +440,26 @@ const saveFlat = async () => {
     resetForm()
     loadFlats()
   } catch (error) {
-    $q.notify({
-      type: 'negative',
-      message: 'Ошибка при сохранении квартиры: ' + error.message
-    })
-  }
+          let errorMessage = 'Неизвестная ошибка'
+              if (error.response && error.response.data) {
+                const errorData = error.response.data
+                if (errorData.message) {
+                  errorMessage = errorData.message + '. '
+                  if (errorData.errors && errorData.errors.length > 0) {
+                    errorMessage += errorData.errors.join(', ')
+                  }
+                } else {
+                  errorMessage = errorData.message || JSON.stringify(errorData)
+                }
+              } else if (error.message) {
+                errorMessage = error.message
+              }
+              $q.notify({
+                type: 'negative',
+                message: errorMessage,
+                position: 'top'
+              })
+        }
 }
 
 // Удаление квартиры
@@ -448,11 +478,26 @@ const deleteFlat = async (id) => {
       })
       loadFlats()
     } catch (error) {
-      $q.notify({
-        type: 'negative',
-        message: 'Ошибка при удалении квартиры: ' + error.message
-      })
-    }
+            let errorMessage = 'Неизвестная ошибка'
+                if (error.response && error.response.data) {
+                  const errorData = error.response.data
+                  if (errorData.message) {
+                    errorMessage = errorData.message + '. '
+                    if (errorData.errors && errorData.errors.length > 0) {
+                      errorMessage += errorData.errors.join(', ')
+                    }
+                  } else {
+                    errorMessage = errorData.message || JSON.stringify(errorData)
+                  }
+                } else if (error.message) {
+                  errorMessage = error.message
+                }
+                $q.notify({
+                  type: 'negative',
+                  message: errorMessage,
+                  position: 'top'
+                })
+          }
   })
 }
 
@@ -465,11 +510,26 @@ const getUniqueLivingSpaces = async () => {
       message: response.data.join(', ')
     })
   } catch (error) {
-    $q.notify({
-      type: 'negative',
-      message: 'Ошибка при получении уникальных значений: ' + error.message
-    })
-  }
+          let errorMessage = 'Неизвестная ошибка'
+              if (error.response && error.response.data) {
+                const errorData = error.response.data
+                if (errorData.message) {
+                  errorMessage = errorData.message + '. '
+                  if (errorData.errors && errorData.errors.length > 0) {
+                    errorMessage += errorData.errors.join(', ')
+                  }
+                } else {
+                  errorMessage = errorData.message || JSON.stringify(errorData)
+                }
+              } else if (error.message) {
+                errorMessage = error.message
+              }
+              $q.notify({
+                type: 'negative',
+                message: errorMessage,
+                position: 'top'
+              })
+        }
 }
 
 // Удаление по отделке
@@ -498,11 +558,26 @@ const confirmDeleteByFurnish = async () => {
       deleteFurnish.value = null
       loadFlats()
     } catch (error) {
-      $q.notify({
-        type: 'negative',
-        message: 'Ошибка при удалении квартир: ' + error.message
-      })
-    }
+            let errorMessage = 'Неизвестная ошибка'
+                if (error.response && error.response.data) {
+                  const errorData = error.response.data
+                  if (errorData.message) {
+                    errorMessage = errorData.message + '. '
+                    if (errorData.errors && errorData.errors.length > 0) {
+                      errorMessage += errorData.errors.join(', ')
+                    }
+                  } else {
+                    errorMessage = errorData.message || JSON.stringify(errorData)
+                  }
+                } else if (error.message) {
+                  errorMessage = error.message
+                }
+                $q.notify({
+                  type: 'negative',
+                  message: errorMessage,
+                  position: 'top'
+                })
+          }
   })
 }
 
