@@ -1,10 +1,19 @@
+server:
+  port: 8443
+  ssl:
+    key-store: classpath:server.p12
+    key-store-password: test123
+    key-store-type: PKCS12
+    key-alias: myserver
+    enabled: true
+
 spring:
   application:
     name: ${PROJECT_NAME:soa_lab1}
   profiles:
     active: ${SPRING_PROFILE_NAME:local}
   datasource:
-    url: jdbc:postgresql://localhost:5432/flats
+    url: jdbc:postgresql://localhost:5432/shrew
     username: example
     password: example
     driver-class-name: org.postgresql.Driver

@@ -17,6 +17,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.web.cors.CorsConfiguration;
 
+import java.util.Collections;
 import java.util.List;
 
 @Configuration
@@ -30,12 +31,14 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.configurationSource(request -> {
                     CorsConfiguration config = new CorsConfiguration();
-                    config.setAllowedOriginPatterns(List.of("*")); // Для всех origin
+                    config.setAllowedOriginPatterns(List.of("https://localhost:8081"));
                     config.setAllowedMethods(List.of("*")); // Все методы (GET, POST и т.д.)
                     config.setAllowedHeaders(List.of("*")); // Все заголовки
                     config.setAllowCredentials(false); // Если не нужны куки
                     return config;
                 }))
+                .requiresChannel(channel ->
+                        channel.anyRequest().requiresSecure())
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/swagger-ui/**", "/swagger-resources/*", "/v3/api-docs/**", "/v3/api-docs.yaml").permitAll()
                         .requestMatchers("/api/**").permitAll())
