@@ -12,14 +12,11 @@ info:
 
     ### Архитектура:
     - RESTful API
-    - Базовая аутентификация
     - Ответы в формате JSON
   version: v1.0.0
 servers:
-- url: http://localhost:22288
+- url: http://localhost:8080
   description: Generated server url
-security:
-- basicAuth: []
 tags:
 - name: Flat API
   description: API для управления квартирами
@@ -117,7 +114,7 @@ paths:
           type: integer
           format: int64
       responses:
-        "200":
+        "204":
           description: Квартира успешно удалена
         "404":
           description: Квартира не найдена
@@ -162,7 +159,67 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
-  /api/flats/filtered:
+  /api/flats/unique-living-spaces:
+    get:
+      tags:
+      - Flat API
+      summary: Получить уникальные значения жилой площади
+      operationId: getUniqueLivingSpaces
+      responses:
+        "200":
+          description: Уникальные значения жилой площади получены
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  type: number
+                  format: double
+        "202":
+          description: Задача по поиску уникальных значений в работе
+        "404":
+          description: Задача не найдена
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Внутренняя ошибка сервера
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    post:
+      tags:
+      - Flat API
+      summary: Запустить поиск уникальных значений жилой площади
+      operationId: launchUniqueLivingSpacesJob
+      responses:
+        "204":
+          description: Запущен поиск уникальных значений жилой площади
+        "500":
+          description: Внутренняя ошибка сервера
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    delete:
+      tags:
+      - Flat API
+      summary: Отменить поиск уникальных значений жилой площади
+      operationId: cancelUniqueLivingSpacesJob
+      responses:
+        "204":
+          description: Поиск уникальных значений жилой площади отменен
+        "404":
+          description: Задача не найдена
+        "500":
+          description: Внутренняя ошибка сервера
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /api/flats/filter:
     post:
       tags:
       - Flat API
@@ -183,7 +240,7 @@ paths:
         schema:
           type: string
           default: asc
-      - name: page
+      - name: pageNumber
         in: query
         description: Номер страницы (начиная с 0)
         required: false
@@ -191,7 +248,7 @@ paths:
           type: integer
           format: int32
           default: 0
-      - name: size
+      - name: pageSize
         in: query
         description: Размер страницы
         required: false
@@ -224,59 +281,8 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
-  /api/flats/unique_living_spaces:
-    get:
-      tags:
-      - Flat API
-      summary: Получить уникальные значения жилой площади
-      operationId: getUniqueLivingSpaces
-      responses:
-        "200":
-          description: Уникальные значения жилой площади получены
-          content:
-            '*/*':
-              schema:
-                type: array
-                items:
-                  type: number
-                  format: double
-        "500":
-          description: Внутренняя ошибка сервера
-          content:
-            '*/*':
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-  /api/flats/rooms_greater_than/{rooms}:
-    get:
-      tags:
-      - Flat API
-      summary: Получить квартиры с количеством комнат больше указанного
-      operationId: getFlatsWithMoreRooms
-      parameters:
-      - name: rooms
-        in: path
-        description: Минимальное количество комнат
-        required: true
-        schema:
-          type: integer
-          format: int32
-      responses:
-        "200":
-          description: Список квартир получен
-          content:
-            '*/*':
-              schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/Flat"
-        "500":
-          description: Внутренняя ошибка сервера
-          content:
-            '*/*':
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
   /api/agency/get-most-expensive/{id1}/{id2}/{id3}:
-    get:
+    post:
       tags:
       - Agency API
       summary: Выбрать наиболее дорогую квартиру из трёх
@@ -320,7 +326,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
   /api/agency/find-with-balcony/{cheapest}/{withBalcony}:
-    get:
+    post:
       tags:
       - Agency API
       summary: Найти самую дешёвую/дорогую квартиру с балконом/без балкона
@@ -355,7 +361,44 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
-  /api/flats/by_furnish/{furnish}:
+  /api/flats/rooms-greater-than/{rooms}:
+    get:
+      tags:
+      - Flat API
+      summary: Получить квартиры с количеством комнат больше указанного
+      operationId: getFlatsWithMoreRooms
+      parameters:
+      - name: rooms
+        in: path
+        description: Минимальное количество комнат
+        required: true
+        schema:
+          type: integer
+          format: int32
+      responses:
+        "200":
+          description: Список квартир получен
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Flat"
+        "404":
+          description: Квартир не найдено
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Flat"
+        "500":
+          description: Внутренняя ошибка сервера
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /api/flats/by-furnish/{furnish}:
     delete:
       tags:
       - Flat API
@@ -376,8 +419,10 @@ paths:
           - BAD
           - LITTLE
       responses:
-        "200":
+        "204":
           description: Квартиры успешно удалены
+        "404":
+          description: Тип отделки не найден
         "500":
           description: Внутренняя ошибка сервера
           content:
@@ -635,21 +680,26 @@ components:
           description: Список квартир на текущей странице
           items:
             $ref: "#/components/schemas/Flat"
-        page:
+        pageNumber:
           type: integer
           format: int32
           description: Номер текущей страницы (начиная с 0)
           minimum: 0
-        size:
+        pageNumberOfElements:
           type: integer
           format: int32
           description: Количество элементов на странице
+        totalPages:
+          type: integer
+          format: int32
+          description: Количество страниц всего
+        numberOfElements:
+          type: integer
+          format: int32
+          description: Количество элементов всего
       required:
       - flats
-      - page
-      - size
-  securitySchemes:
-    basicAuth:
-      type: http
-      in: header
-      scheme: basic
+      - numberOfElements
+      - pageNumber
+      - pageNumberOfElements
+      - totalPages
