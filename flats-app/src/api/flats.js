@@ -42,13 +42,12 @@ export const flatsApi = {
     return api.delete('/api/flats/unique-living-spaces')
   },
 
-  // Получить все квартиры с фильтрацией
   getFlats: (filters, pagination, sort) => {
     const params = {
-      page: pagination.page || 0,
-      size: pagination.rowsPerPage || 20,
+      pageNumber: pagination.pageNumber || 0,      // Изменено с page на pageNumber
+      pageSize: pagination.pageSize || 20,         // Изменено с size на pageSize
       sortBy: sort.sortBy || 'id',
-      sortDirection: sort.descending ? 'desc' : 'asc',
+      sortDirection: sort.sortDirection || 'asc',   // Добавлен sortDirection
     }
 
     return api.post('/api/flats/filter', filters, { params })

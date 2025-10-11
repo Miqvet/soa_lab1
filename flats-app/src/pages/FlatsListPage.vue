@@ -358,12 +358,18 @@ const loadFlats = async (props = {}) => {
 
     const response = await flatsApi.getFlats(
       filters.value,
-      { page: page - 1, size: rowsPerPage },
-      { sortBy, descending }
+      {
+        pageNumber: page - 1,
+        pageSize: rowsPerPage
+      },
+      {
+        sortBy,
+        sortDirection: descending ? 'desc' : 'asc'  // Добавлен sortDirection
+      }
     )
 
     flats.value = response.data.flats
-    pagination.value.rowsNumber = response.data.totalElements || response.data.flats.length
+    pagination.value.rowsNumber = response.data.numberOfElements  // Изменено с totalElements на numberOfElements
     pagination.value.page = page
     pagination.value.rowsPerPage = rowsPerPage
     pagination.value.sortBy = sortBy
