@@ -1,9 +1,6 @@
 import axios from 'axios'
 
-const API_BASE_URL = 'http://localhost:8080' // Замените на ваш URL
-
 const api = axios.create({
-  baseURL: API_BASE_URL,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -36,12 +33,12 @@ export const flatsApi = {
   },
 
   // Получить уникальные значения жилой площади post(Начать асинхр задачу)
-  getUniqueLivingSpaces: () => {
+  postUniqueLivingSpaces: () => {
     return api.post('/api/flats/unique-living-spaces')
   },
 
   // Получить уникальные значения жилой площади delete(Остановить задачу)
-  getUniqueLivingSpaces: () => {
+  deleteUniqueLivingSpaces: () => {
     return api.delete('/api/flats/unique-living-spaces')
   },
 

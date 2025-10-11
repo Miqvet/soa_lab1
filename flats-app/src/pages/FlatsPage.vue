@@ -832,7 +832,7 @@ const formatDate = (dateString) => {
 const launchUniqueLivingSpacesJob = async () => {
   jobLoading.value = true
   try {
-    await flatsApi.launchUniqueLivingSpacesJob()
+    await flatsApi.postUniqueLivingSpaces()
     $q.notify({
       type: 'positive',
       message: 'Задача по поиску уникальных значений жилой площади запущена',
@@ -913,7 +913,7 @@ const getUniqueLivingSpaces = async () => {
 // Метод для отмены задачи
 const cancelUniqueLivingSpacesJob = async () => {
   try {
-    await flatsApi.cancelUniqueLivingSpacesJob()
+    await flatsApi.deleteUniqueLivingSpaces()
     $q.notify({
       type: 'positive',
       message: 'Задача по поиску уникальных значений жилой площади отменена',
