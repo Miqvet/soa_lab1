@@ -20,11 +20,17 @@ export default defineConfig({
       cert: fs.readFileSync(path.resolve(__dirname, 'localhost.crt'))
     },
     proxy: {
-      '/api': {
-        target: 'https://localhost:8443', // Убедитесь, что это HTTPS
+      '/flats-api': {
+        target: 'https://localhost:8080',
         changeOrigin: true,
-        secure: false, // важно для самоподписанных сертификатов
-        ws: true
+        secure: false,
+        rewrite: (path) => path.replace(/^\/flats-api/, '/itmo-soa-lab2-1.0/api')
+      },
+      '/agency-api': {
+        target: 'https://localhost:8084',
+        changeOrigin: true,
+        secure: false,
+        rewrite: (path) => path.replace(/^\/agency-api/, '/api')
       }
     }
   }

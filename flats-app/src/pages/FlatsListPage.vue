@@ -24,6 +24,12 @@
               <q-input v-model="filters.max_rooms" type="number" label="Макс. комнаты" />
             </div>
             <div class="col-12 col-sm-6 col-md-3">
+              <q-input v-model="filters.min_price" type="number" label="Мин. цена" />
+            </div>
+            <div class="col-12 col-sm-6 col-md-3">
+              <q-input v-model="filters.max_price" type="number" label="Макс. цена" />
+            </div>
+            <div class="col-12 col-sm-6 col-md-3">
               <q-select
                 v-model="filters.furnish"
                 :options="furnishOptions"
@@ -122,6 +128,18 @@
                   label="Жилая площадь *"
                   outlined
                   :rules="[val => !!val || 'Обязательное поле']"
+                />
+              </div>
+              <div class="col-12 col-sm-6">
+                <q-input
+                  v-model="flatForm.price"
+                  type="number"
+                  label="Цена *"
+                  outlined
+                  :rules="[
+                    val => !!val || 'Обязательное поле',
+                    val => val > 0 || 'Цена должна быть положительной'
+                  ]"
                 />
               </div>
               <div class="col-12 col-sm-6">
@@ -277,6 +295,7 @@ const columns = [
   { name: 'area', label: 'Площадь', field: 'area', align: 'left', sortable: true },
   { name: 'number_of_rooms', label: 'Комнаты', field: 'number_of_rooms', align: 'left', sortable: true },
   { name: 'living_space', label: 'Жилая площадь', field: 'living_space', align: 'left', sortable: true },
+  { name: 'price', label: 'Цена', field: 'price', align: 'left', sortable: true },
   { name: 'furnish', label: 'Отделка', field: 'furnish', align: 'left', sortable: true },
   { name: 'transport', label: 'Транспорт', field: 'transport', align: 'left', sortable: true },
   { name: 'balcony', label: 'Балкон', field: 'balcony', align: 'left', format: val => val ? 'Да' : 'Нет' },
@@ -322,6 +341,8 @@ const filters = ref({
   max_area: null,
   min_rooms: null,
   max_rooms: null,
+  min_price: null,
+  max_price: null,
   furnish: null,
   transport: null
 })
@@ -412,6 +433,8 @@ const resetFilters = () => {
     max_area: null,
     min_rooms: null,
     max_rooms: null,
+    min_price: null,
+    max_price: null,
     furnish: null,
     transport: null
   }

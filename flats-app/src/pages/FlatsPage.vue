@@ -137,6 +137,18 @@
                   :rules="[val => !!val || 'Обязательное поле']"
                 />
               </div>
+              <div class="col-12 col-sm-6">
+                <q-input
+                  v-model="flatForm.price"
+                  type="number"
+                  label="Цена *"
+                  outlined
+                  :rules="[
+                    val => !!val || 'Обязательное поле',
+                    val => val > 0 || 'Цена должна быть положительной'
+                  ]"
+                />
+              </div>
               <div class="col-12">
                 <q-checkbox
                   v-model="flatForm.balcony"
@@ -310,6 +322,10 @@
                 <div class="text-body1">{{ viewedFlat.living_space }} м²</div>
               </div>
               <div class="col-12 col-sm-6">
+                <div class="text-caption text-grey-7">Цена</div>
+                <div class="text-body1">{{ viewedFlat.price }} ₽</div>
+              </div>
+              <div class="col-12 col-sm-6">
                 <div class="text-caption text-grey-7">Отделка</div>
                 <div class="text-body1">{{ getFurnishLabel(viewedFlat.furnish) }}</div>
               </div>
@@ -401,20 +417,6 @@ import { useQuasar } from 'quasar'
 import { flatsApi } from '../api/flats.js'
 
 const $q = useQuasar()
-
-// Колонки таблицы
-const columns = [
-  { name: 'id', label: 'ID', field: 'id', align: 'left', sortable: true },
-  { name: 'name', label: 'Название', field: 'name', align: 'left', sortable: true },
-  { name: 'area', label: 'Площадь', field: 'area', align: 'left', sortable: true },
-  { name: 'number_of_rooms', label: 'Комнаты', field: 'number_of_rooms', align: 'left', sortable: true },
-  { name: 'living_space', label: 'Жилая площадь', field: 'living_space', align: 'left', sortable: true },
-  { name: 'furnish', label: 'Отделка', field: 'furnish', align: 'left', sortable: true },
-  { name: 'transport', label: 'Транспорт', field: 'transport', align: 'left', sortable: true },
-  { name: 'balcony', label: 'Балкон', field: 'balcony', align: 'left', format: val => val ? 'Да' : 'Нет' },
-  { name: 'creationDate', label: 'Дата создания', field: 'creationDate', align: 'left', sortable: true },
-  { name: 'actions', label: 'Действия', align: 'center' }
-]
 
 // Опции для селектов
 const furnishOptions = [
@@ -534,20 +536,6 @@ const loadFlats = async (props = {}) => {
 // Обработчик запроса таблицы
 const onRequest = (props) => {
   loadFlats(props)
-}
-
-// Сброс фильтров
-const resetFilters = () => {
-  filters.value = {
-    name: null,
-    min_area: null,
-    max_area: null,
-    min_rooms: null,
-    max_rooms: null,
-    furnish: null,
-    transport: null
-  }
-  loadFlats()
 }
 
 // Редактирование квартиры
@@ -699,6 +687,7 @@ const resetForm = () => {
     area: 0,
     number_of_rooms: 0,
     living_space: 0,
+    price: 0,
     furnish: null,
     transport: null,
     balcony: false,
