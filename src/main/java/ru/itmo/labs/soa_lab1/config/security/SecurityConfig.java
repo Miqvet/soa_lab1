@@ -22,16 +22,13 @@ import java.util.List;
 
 @Configuration
 public class SecurityConfig {
-
-    private static final String API_USER_ROLE = "api_user";
-
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
         return httpSecurity
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.configurationSource(request -> {
                     CorsConfiguration config = new CorsConfiguration();
-                    config.setAllowedOriginPatterns(List.of("https://localhost:8081"));
+                    config.setAllowedOriginPatterns(List.of("https://frontend.local:8081"));
                     config.setAllowedMethods(List.of("*")); // Все методы (GET, POST и т.д.)
                     config.setAllowedHeaders(List.of("*")); // Все заголовки
                     config.setAllowCredentials(false); // Если не нужны куки
@@ -42,29 +39,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/swagger-ui/**", "/swagger-resources/*", "/v3/api-docs/**", "/v3/api-docs.yaml").permitAll()
                         .requestMatchers("/api/**").permitAll())
-                .httpBasic(Customizer.withDefaults())
                 .sessionManagement(conf -> conf.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .build();
-    }
-
-    @Bean
-    public UserDetailsService userDetailsService(@Value("${api.auth.users}") String users,
-                                                 PasswordEncoder passwordEncoder,
-                                                 ObjectMapper objectMapper) throws Exception {
-        var appUsers = objectMapper.readValue(users, new TypeReference<List<AppUser>>() {
-        });
-        var userDetails = appUsers.stream()
-                .map(user -> User.builder()
-                        .username(user.username())
-                        .password(passwordEncoder.encode(user.password()))
-                        .roles(user.roles().toArray(String[]::new))
-                        .build())
-                .toList();
-        return new InMemoryUserDetailsManager(userDetails);
-    }
-
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
     }
 }

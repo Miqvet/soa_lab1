@@ -15,9 +15,10 @@ export default defineConfig({
   ],
   server: {
     port: 8081,
+    host: 'frontend.local',
     https: {
-      key: fs.readFileSync(path.resolve(__dirname, 'localhost.key')),
-      cert: fs.readFileSync(path.resolve(__dirname, 'localhost.crt'))
+      key: fs.readFileSync(path.resolve(__dirname, 'certs/frontend/frontend.key')),
+      cert: fs.readFileSync(path.resolve(__dirname, 'certs/frontend/frontend.crt'))
     },
     proxy: {
       '/flats-api': {
@@ -27,7 +28,7 @@ export default defineConfig({
         rewrite: (path) => path.replace(/^\/flats-api/, '/itmo-soa-lab2-1.0/api')
       },
       '/agency-api': {
-        target: 'https://localhost:8084',
+        target: 'https://localhost:8443',
         changeOrigin: true,
         secure: false,
         rewrite: (path) => path.replace(/^\/agency-api/, '/api')
