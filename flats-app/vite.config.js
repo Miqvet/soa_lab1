@@ -22,7 +22,7 @@ export default defineConfig({
     },
     proxy: {
       '/flats-api': {
-        target: 'https://localhost:8080',
+        target: 'https://localhost:8182',
         changeOrigin: true,
         secure: false,
         rewrite: (path) => path.replace(/^\/flats-api/, '/itmo-soa-lab2-1.0/api')
