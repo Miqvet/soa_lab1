@@ -47,12 +47,60 @@
                 map-options
               />
             </div>
+            <div class="col-12 col-sm-6 col-md-3">
+              <q-checkbox
+                v-model="filters.has_balcony"
+                label="Только с балконом"
+                size="md"
+              />
+            </div>
             <div class="col-12 col-sm-6 col-md-3 flex items-end">
               <q-btn label="Применить фильтры" type="submit" color="primary" />
               <q-btn label="Сбросить" @click="resetFilters" color="secondary" class="q-ml-sm" />
             </div>
           </div>
         </q-form>
+      </q-card-section>
+    </q-card>
+
+    <!-- Сортировка -->
+    <q-card class="q-mb-md">
+      <q-card-section>
+        <div class="text-h6">Сортировка</div>
+        <div class="row q-col-gutter-md items-center">
+          <div class="col-12 col-sm-6">
+            <q-select
+              v-model="sortFields"
+              :options="sortableFields"
+              label="Поля для сортировки"
+              multiple
+              emit-value
+              map-options
+              use-chips
+              clearable
+            />
+          </div>
+          <div class="col-12 col-sm-3">
+            <q-select
+              v-model="sortDirection"
+              :options="directionOptions"
+              label="Направление"
+              emit-value
+              map-options
+            />
+          </div>
+          <div class="col-12 col-sm-3">
+            <q-btn
+              label="Применить сортировку"
+              @click="applySorting"
+              color="primary"
+              :disabled="!sortFields.length"
+            />
+          </div>
+        </div>
+        <div v-if="currentSorting.length" class="q-mt-sm">
+          <small class="text-grey">Текущая сортировка: {{ currentSorting.join(', ') }}</small>
+        </div>
       </q-card-section>
     </q-card>
 
@@ -88,7 +136,7 @@
                 <div class="text-subtitle1 text-weight-medium q-pb-sm">Основная информация</div>
                 <q-separator />
               </div>
-              
+
               <div class="col-12 col-sm-6">
                 <q-input
                   v-model="flatForm.name"
@@ -166,20 +214,20 @@
               </div>
               <div class="col-12">
                 <q-checkbox
-                  v-model="flatForm.balcony"
+                  v-model="flatForm.has_balcony"
                   label="Балкон"
                   size="lg"
                 />
               </div>
             </div>
-            
+
             <!-- Координаты -->
             <div class="row q-col-gutter-lg q-mt-md">
               <div class="col-12">
                 <div class="text-subtitle1 text-weight-medium q-pb-sm">Координаты</div>
                 <q-separator />
               </div>
-              
+
               <div class="col-12 col-sm-6">
                 <q-input
                   v-model="flatForm.coordinates.x"
@@ -205,14 +253,14 @@
                 />
               </div>
             </div>
-            
+
             <!-- Дом -->
             <div class="row q-col-gutter-lg q-mt-md">
               <div class="col-12">
                 <div class="text-subtitle1 text-weight-medium q-pb-sm">Информация о доме</div>
                 <q-separator />
               </div>
-              
+
               <div class="col-12 col-sm-6">
                 <q-input
                   v-model="flatForm.house.name"
@@ -258,19 +306,19 @@
                 />
               </div>
             </div>
-            
+
             <q-card-actions align="right" class="q-px-none q-pt-lg">
-              <q-btn 
-                flat 
-                label="Отмена" 
-                color="primary" 
-                v-close-popup 
+              <q-btn
+                flat
+                label="Отмена"
+                color="primary"
+                v-close-popup
                 class="q-mr-md"
               />
-              <q-btn 
-                type="submit" 
-                :label="editingFlat ? 'Сохранить' : 'Добавить'" 
-                color="primary" 
+              <q-btn
+                type="submit"
+                :label="editingFlat ? 'Сохранить' : 'Добавить'"
+                color="primary"
                 :loading="saving"
               />
             </q-card-actions>
@@ -282,7 +330,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useQuasar } from 'quasar'
 import { flatsApi } from '../api/flats.js'
 
@@ -298,7 +346,7 @@ const columns = [
   { name: 'price', label: 'Цена', field: 'price', align: 'left', sortable: true },
   { name: 'furnish', label: 'Отделка', field: 'furnish', align: 'left', sortable: true },
   { name: 'transport', label: 'Транспорт', field: 'transport', align: 'left', sortable: true },
-  { name: 'balcony', label: 'Балкон', field: 'balcony', align: 'left', format: val => val ? 'Да' : 'Нет' },
+  { name: 'has_balcony', label: 'Балкон', field: 'has_balcony', align: 'left', format: val => val ? 'Да' : 'Нет' },
   { name: 'creationDate', label: 'Дата создания', field: 'creationDate', align: 'left', sortable: true },
   { name: 'actions', label: 'Действия', align: 'center' }
 ]
@@ -319,13 +367,35 @@ const transportOptions = [
   { label: 'ENOUGH', value: 'ENOUGH' }
 ]
 
+// Поля для сортировки
+const sortableFields = [
+  { label: 'ID', value: 'id' },
+  { label: 'Название', value: 'name' },
+  { label: 'Площадь', value: 'area' },
+  { label: 'Количество комнат', value: 'numberOfRooms' },
+  { label: 'Жилая площадь', value: 'livingSpace' },
+  { label: 'Цена', value: 'price' },
+  { label: 'Отделка', value: 'furnish' },
+  { label: 'Транспорт', value: 'transport' },
+  { label: 'Балкон', value: 'has_balcony' },
+  { label: 'Дата создания', value: 'creationDate' }
+]
+
+const directionOptions = [
+  { label: 'По возрастанию', value: 'asc' },
+  { label: 'По убыванию', value: 'desc' }
+]
+
 // Реактивные данные
 const flats = ref([])
 const loading = ref(false)
+const saving = ref(false)
 const showAddDialog = ref(false)
-const showDeleteByFurnishDialog = ref(false)
 const editingFlat = ref(null)
-const deleteFurnish = ref(null)
+
+// Сортировка
+const sortFields = ref([])
+const sortDirection = ref('asc')
 
 // Пагинация
 const pagination = ref({
@@ -344,7 +414,8 @@ const filters = ref({
   min_price: null,
   max_price: null,
   furnish: null,
-  transport: null
+  transport: null,
+  has_balcony: null
 })
 
 // Форма квартиры
@@ -357,9 +428,10 @@ const flatForm = ref({
   area: 0,
   number_of_rooms: 0,
   living_space: 0,
+  price: 0,
   furnish: null,
   transport: null,
-  balcony: false,
+  has_balcony: false,
   house: {
     name: '',
     year: 0,
@@ -368,14 +440,28 @@ const flatForm = ref({
   }
 })
 
+// Вычисляемое свойство для отображения текущей сортировки
+const currentSorting = computed(() => {
+  if (!sortFields.value.length) return []
+  return sortFields.value.map(field => {
+    const fieldLabel = sortableFields.find(f => f.value === field)?.label || field
+    return `${fieldLabel} (${sortDirection.value === 'asc' ? '↑' : '↓'})`
+  })
+})
+
 // Загрузка данных
 const loadFlats = async (props = {}) => {
   loading.value = true
   try {
     const page = props.pagination?.page || pagination.value.page
     const rowsPerPage = props.pagination?.rowsPerPage || pagination.value.rowsPerPage
-    const sortBy = props.pagination?.sortBy || 'id'
-    const descending = props.pagination?.descending || false
+
+    // Формируем параметры сортировки
+    const sortParams = {}
+    if (sortFields.value.length) {
+      sortParams.sortBy = sortFields.value.join(',')
+      sortParams.sortDirection = sortDirection.value
+    }
 
     const response = await flatsApi.getFlats(
       filters.value,
@@ -383,39 +469,34 @@ const loadFlats = async (props = {}) => {
         pageNumber: page - 1,
         pageSize: rowsPerPage
       },
-      {
-        sortBy,
-        sortDirection: descending ? 'desc' : 'asc'  // Добавлен sortDirection
-      }
+      sortParams
     )
 
     flats.value = response.data.flats
-    pagination.value.rowsNumber = response.data.numberOfElements  // Изменено с totalElements на numberOfElements
+    pagination.value.rowsNumber = response.data.numberOfElements
     pagination.value.page = page
     pagination.value.rowsPerPage = rowsPerPage
-    pagination.value.sortBy = sortBy
-    pagination.value.descending = descending
   } catch (error) {
-          let errorMessage = 'Неизвестная ошибка'
-              if (error.response && error.response.data) {
-                const errorData = error.response.data
-                if (errorData.message) {
-                  errorMessage = errorData.message + '. '
-                  if (errorData.errors && errorData.errors.length > 0) {
-                    errorMessage += errorData.errors.join(', ')
-                  }
-                } else {
-                  errorMessage = errorData.message || JSON.stringify(errorData)
-                }
-              } else if (error.message) {
-                errorMessage = error.message
-              }
-              $q.notify({
-                type: 'negative',
-                message: errorMessage,
-                position: 'top'
-              })
-        } finally {
+    let errorMessage = 'Неизвестная ошибка'
+    if (error.response && error.response.data) {
+      const errorData = error.response.data
+      if (errorData.message) {
+        errorMessage = errorData.message + '. '
+        if (errorData.errors && errorData.errors.length > 0) {
+          errorMessage += errorData.errors.join(', ')
+        }
+      } else {
+        errorMessage = errorData.message || JSON.stringify(errorData)
+      }
+    } else if (error.message) {
+      errorMessage = error.message
+    }
+    $q.notify({
+      type: 'negative',
+      message: errorMessage,
+      position: 'top'
+    })
+  } finally {
     loading.value = false
   }
 }
@@ -423,6 +504,12 @@ const loadFlats = async (props = {}) => {
 // Обработчик запроса таблицы
 const onRequest = (props) => {
   loadFlats(props)
+}
+
+// Применение сортировки
+const applySorting = () => {
+  pagination.value.page = 1
+  loadFlats()
 }
 
 // Сброс фильтров
@@ -436,7 +523,8 @@ const resetFilters = () => {
     min_price: null,
     max_price: null,
     furnish: null,
-    transport: null
+    transport: null,
+    has_balcony: null
   }
   loadFlats()
 }
@@ -450,6 +538,7 @@ const editFlat = (flat) => {
 
 // Сохранение квартиры
 const saveFlat = async () => {
+  saving.value = true
   try {
     if (editingFlat.value) {
       await flatsApi.updateFlat(editingFlat.value, flatForm.value)
@@ -469,26 +558,28 @@ const saveFlat = async () => {
     resetForm()
     loadFlats()
   } catch (error) {
-          let errorMessage = 'Неизвестная ошибка'
-              if (error.response && error.response.data) {
-                const errorData = error.response.data
-                if (errorData.message) {
-                  errorMessage = errorData.message + '. '
-                  if (errorData.errors && errorData.errors.length > 0) {
-                    errorMessage += errorData.errors.join(', ')
-                  }
-                } else {
-                  errorMessage = errorData.message || JSON.stringify(errorData)
-                }
-              } else if (error.message) {
-                errorMessage = error.message
-              }
-              $q.notify({
-                type: 'negative',
-                message: errorMessage,
-                position: 'top'
-              })
+    let errorMessage = 'Неизвестная ошибка'
+    if (error.response && error.response.data) {
+      const errorData = error.response.data
+      if (errorData.message) {
+        errorMessage = errorData.message + '. '
+        if (errorData.errors && errorData.errors.length > 0) {
+          errorMessage += errorData.errors.join(', ')
         }
+      } else {
+        errorMessage = errorData.message || JSON.stringify(errorData)
+      }
+    } else if (error.message) {
+      errorMessage = error.message
+    }
+    $q.notify({
+      type: 'negative',
+      message: errorMessage,
+      position: 'top'
+    })
+  } finally {
+    saving.value = false
+  }
 }
 
 // Удаление квартиры
@@ -507,106 +598,26 @@ const deleteFlat = async (id) => {
       })
       loadFlats()
     } catch (error) {
-            let errorMessage = 'Неизвестная ошибка'
-                if (error.response && error.response.data) {
-                  const errorData = error.response.data
-                  if (errorData.message) {
-                    errorMessage = errorData.message + '. '
-                    if (errorData.errors && errorData.errors.length > 0) {
-                      errorMessage += errorData.errors.join(', ')
-                    }
-                  } else {
-                    errorMessage = errorData.message || JSON.stringify(errorData)
-                  }
-                } else if (error.message) {
-                  errorMessage = error.message
-                }
-                $q.notify({
-                  type: 'negative',
-                  message: errorMessage,
-                  position: 'top'
-                })
+      let errorMessage = 'Неизвестная ошибка'
+      if (error.response && error.response.data) {
+        const errorData = error.response.data
+        if (errorData.message) {
+          errorMessage = errorData.message + '. '
+          if (errorData.errors && errorData.errors.length > 0) {
+            errorMessage += errorData.errors.join(', ')
           }
-  })
-}
-
-// Получение уникальных значений жилой площади
-const getUniqueLivingSpaces = async () => {
-  try {
-    const response = await flatsApi.getUniqueLivingSpaces()
-    $q.dialog({
-      title: 'Уникальные значения жилой площади',
-      message: response.data.join(', ')
-    })
-  } catch (error) {
-          let errorMessage = 'Неизвестная ошибка'
-              if (error.response && error.response.data) {
-                const errorData = error.response.data
-                if (errorData.message) {
-                  errorMessage = errorData.message + '. '
-                  if (errorData.errors && errorData.errors.length > 0) {
-                    errorMessage += errorData.errors.join(', ')
-                  }
-                } else {
-                  errorMessage = errorData.message || JSON.stringify(errorData)
-                }
-              } else if (error.message) {
-                errorMessage = error.message
-              }
-              $q.notify({
-                type: 'negative',
-                message: errorMessage,
-                position: 'top'
-              })
+        } else {
+          errorMessage = errorData.message || JSON.stringify(errorData)
         }
-}
-
-// Удаление по отделке
-const confirmDeleteByFurnish = async () => {
-  if (!deleteFurnish.value) {
-    $q.notify({
-      type: 'warning',
-      message: 'Выберите тип отделки'
-    })
-    return
-  }
-
-  $q.dialog({
-    title: 'Подтверждение',
-    message: `Вы уверены, что хотите удалить все квартиры с отделкой "${deleteFurnish.value}"?`,
-    cancel: true,
-    persistent: true
-  }).onOk(async () => {
-    try {
-      await flatsApi.deleteByFurnish(deleteFurnish.value)
+      } else if (error.message) {
+        errorMessage = error.message
+      }
       $q.notify({
-        type: 'positive',
-        message: 'Квартиры успешно удалены'
+        type: 'negative',
+        message: errorMessage,
+        position: 'top'
       })
-      showDeleteByFurnishDialog.value = false
-      deleteFurnish.value = null
-      loadFlats()
-    } catch (error) {
-            let errorMessage = 'Неизвестная ошибка'
-                if (error.response && error.response.data) {
-                  const errorData = error.response.data
-                  if (errorData.message) {
-                    errorMessage = errorData.message + '. '
-                    if (errorData.errors && errorData.errors.length > 0) {
-                      errorMessage += errorData.errors.join(', ')
-                    }
-                  } else {
-                    errorMessage = errorData.message || JSON.stringify(errorData)
-                  }
-                } else if (error.message) {
-                  errorMessage = error.message
-                }
-                $q.notify({
-                  type: 'negative',
-                  message: errorMessage,
-                  position: 'top'
-                })
-          }
+    }
   })
 }
 
@@ -621,9 +632,10 @@ const resetForm = () => {
     area: 0,
     number_of_rooms: 0,
     living_space: 0,
+    price: 0,
     furnish: null,
     transport: null,
-    balcony: false,
+    has_balcony: false,
     house: {
       name: '',
       year: 0,

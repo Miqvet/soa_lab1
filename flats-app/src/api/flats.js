@@ -49,11 +49,23 @@ export const flatsApi = {
     const params = {
       pageNumber: pagination.pageNumber || 0,
       pageSize: pagination.pageSize || 20,
-      sortBy: sort.sortBy || 'id',
-      sortDirection: sort.sortDirection || 'asc',
     }
 
-    return api.post('/flats/filter', filters, { params })
+    // Добавляем параметры сортировки если они есть
+    if (sort && sort.sortBy) {
+      params.sortBy = sort.sortBy
+      params.sortDirection = sort.sortDirection || 'asc'
+    }
+
+    // Очищаем фильтры от null/undefined значений
+    const cleanFilters = {}
+    Object.keys(filters).forEach(key => {
+      if (filters[key] !== null && filters[key] !== undefined && filters[key] !== '') {
+        cleanFilters[key] = filters[key]
+      }
+    })
+
+    return api.post('/flats/filter', cleanFilters, { params })
   },
 
   // Получить квартиры с количеством комнат больше указанного

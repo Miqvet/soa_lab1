@@ -3,7 +3,7 @@
     <q-header elevated class="bg-primary text-white">
       <q-toolbar>
         <q-toolbar-title align="center">
-        Flat manager
+        Менеджер квартир
         </q-toolbar-title>
       </q-toolbar>
 
