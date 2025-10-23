@@ -78,23 +78,65 @@
               map-options
               use-chips
               clearable
+              @update:model-value="handleSortFieldsChange"
             />
           </div>
-          <div class="col-12 col-sm-3">
-            <q-select
-              v-model="sortDirection"
-              :options="directionOptions"
-              label="Направление"
-              emit-value
-              map-options
+          <div class="col-12 col-sm-6">
+            <div class="text-caption q-mb-xs">Направления сортировки:</div>
+            <div class="text-caption q-mb-xs"></div>
+            <div class="row q-col-gutter-xs q-mb-xs">
+              <div class="col-4">
+                <q-btn
+                  label="Asc"
+                  color="primary"
+                  outline
+                  class="full-width"
+                  @click="addDirection('asc')"
+                  :disabled="!canAddDirection"
+                />
+              </div>
+              <div class="col-4">
+                <q-btn
+                  label="Desc"
+                  color="primary"
+                  outline
+                  class="full-width"
+                  @click="addDirection('desc')"
+                  :disabled="!canAddDirection"
+                />
+              </div>
+              <div class="col-4">
+                <q-btn
+                  label="Удалить"
+                  color="negative"
+                  outline
+                  class="full-width"
+                  @click="removeLastDirection"
+                  :disabled="!canRemoveDirection"
+                />
+              </div>
+            </div>
+            <q-input
+              v-model="sortDirectionsInput"
+              label="Направления (через запятую)"
+              :hint="sortDirectionsHint"
+              :error="!!sortError"
+              :error-message="sortError"
             />
           </div>
-          <div class="col-12 col-sm-3">
+          <div class="col-12">
             <q-btn
               label="Применить сортировку"
               @click="applySorting"
               color="primary"
               :disabled="!sortFields.length"
+            />
+            <q-btn
+              label="Сбросить сортировку"
+              @click="resetSorting"
+              color="secondary"
+              class="q-ml-sm"
+              flat
             />
           </div>
         </div>
@@ -121,6 +163,16 @@
         </q-td>
       </template>
     </q-table>
+
+    <!-- Кнопка добавления -->
+    <q-page-sticky position="bottom-right" :offset="[18, 18]">
+      <q-btn
+        fab
+        icon="add"
+        color="primary"
+        @click="showAddDialog = true"
+      />
+    </q-page-sticky>
 
     <q-dialog v-model="showAddDialog" persistent>
       <q-card style="min-width: 70%; max-width: 900px">
@@ -336,6 +388,22 @@ import { flatsApi } from '../api/flats.js'
 
 const $q = useQuasar()
 
+// Маппинг для отображения английских значений на русские
+const furnishMapping = {
+  'DESIGNER': 'Дизайнерская',
+  'NONE': 'Без отделки',
+  'FINE': 'Хорошая',
+  'BAD': 'Плохая',
+  'LITTLE': 'Минимальная'
+}
+
+const transportMapping = {
+  'FEW': 'Мало',
+  'NONE': 'Отсутствует',
+  'LITTLE': 'Чуть-чуть',
+  'ENOUGH': 'Достаточно'
+}
+
 // Колонки таблицы
 const columns = [
   { name: 'id', label: 'ID', field: 'id', align: 'left', sortable: true },
@@ -344,27 +412,47 @@ const columns = [
   { name: 'number_of_rooms', label: 'Комнаты', field: 'number_of_rooms', align: 'left', sortable: true },
   { name: 'living_space', label: 'Жилая площадь', field: 'living_space', align: 'left', sortable: true },
   { name: 'price', label: 'Цена', field: 'price', align: 'left', sortable: true },
-  { name: 'furnish', label: 'Отделка', field: 'furnish', align: 'left', sortable: true },
-  { name: 'transport', label: 'Транспорт', field: 'transport', align: 'left', sortable: true },
-  { name: 'has_balcony', label: 'Балкон', field: 'has_balcony', align: 'left', format: val => val ? 'Да' : 'Нет' },
+  {
+    name: 'furnish',
+    label: 'Отделка',
+    field: 'furnish',
+    align: 'left',
+    sortable: true,
+    format: val => furnishMapping[val] || val
+  },
+  {
+    name: 'transport',
+    label: 'Транспорт',
+    field: 'transport',
+    align: 'left',
+    sortable: true,
+    format: val => transportMapping[val] || val
+  },
+  {
+    name: 'has_balcony',
+    label: 'Балкон',
+    field: 'has_balcony',
+    align: 'left',
+    format: val => val ? 'Да' : 'Нет'
+  },
   { name: 'creationDate', label: 'Дата создания', field: 'creationDate', align: 'left', sortable: true },
   { name: 'actions', label: 'Действия', align: 'center' }
 ]
 
 // Опции для селектов
 const furnishOptions = [
-  { label: 'DESIGNER', value: 'DESIGNER' },
-  { label: 'NONE', value: 'NONE' },
-  { label: 'FINE', value: 'FINE' },
-  { label: 'BAD', value: 'BAD' },
-  { label: 'LITTLE', value: 'LITTLE' }
+  { label: 'Дизайнерская', value: 'DESIGNER' },
+  { label: 'Без отделки', value: 'NONE' },
+  { label: 'Хорошая', value: 'FINE' },
+  { label: 'Плохая', value: 'BAD' },
+  { label: 'Минимальная', value: 'LITTLE' }
 ]
 
 const transportOptions = [
-  { label: 'FEW', value: 'FEW' },
-  { label: 'NONE', value: 'NONE' },
-  { label: 'LITTLE', value: 'LITTLE' },
-  { label: 'ENOUGH', value: 'ENOUGH' }
+  { label: 'Мало', value: 'FEW' },
+  { label: 'Отсутствует', value: 'NONE' },
+  { label: 'Чуть-чуть', value: 'LITTLE' },
+  { label: 'Достаточно', value: 'ENOUGH' }
 ]
 
 // Поля для сортировки
@@ -372,18 +460,13 @@ const sortableFields = [
   { label: 'ID', value: 'id' },
   { label: 'Название', value: 'name' },
   { label: 'Площадь', value: 'area' },
-  { label: 'Количество комнат', value: 'numberOfRooms' },
-  { label: 'Жилая площадь', value: 'livingSpace' },
+  { label: 'Количество комнат', value: 'number_of_rooms' },
+  { label: 'Жилая площадь', value: 'living_space' },
   { label: 'Цена', value: 'price' },
   { label: 'Отделка', value: 'furnish' },
   { label: 'Транспорт', value: 'transport' },
   { label: 'Балкон', value: 'has_balcony' },
   { label: 'Дата создания', value: 'creationDate' }
-]
-
-const directionOptions = [
-  { label: 'По возрастанию', value: 'asc' },
-  { label: 'По убыванию', value: 'desc' }
 ]
 
 // Реактивные данные
@@ -395,7 +478,8 @@ const editingFlat = ref(null)
 
 // Сортировка
 const sortFields = ref([])
-const sortDirection = ref('asc')
+const sortDirectionsInput = ref('')
+const sortError = ref('')
 
 // Пагинация
 const pagination = ref({
@@ -440,14 +524,59 @@ const flatForm = ref({
   }
 })
 
-// Вычисляемое свойство для отображения текущей сортировки
+// Вычисляемые свойства
+const sortDirectionsHint = computed(() => {
+  const count = sortFields.value.length
+  if (count === 0) return 'Выберите поля для сортировки'
+  return `Введите ${count} направлений через запятую (asc или desc)`
+})
+
 const currentSorting = computed(() => {
-  if (!sortFields.value.length) return []
-  return sortFields.value.map(field => {
+  if (!sortFields.value.length || !sortDirectionsInput.value) return []
+
+  const directions = sortDirectionsInput.value.split(',').map(d => d.trim())
+
+  return sortFields.value.map((field, index) => {
     const fieldLabel = sortableFields.find(f => f.value === field)?.label || field
-    return `${fieldLabel} (${sortDirection.value === 'asc' ? '↑' : '↓'})`
+    const direction = directions[index] || 'asc'
+    return `${fieldLabel} (${direction === 'asc' ? '↑' : '↓'})`
   })
 })
+
+const canAddDirection = computed(() => {
+  if (!sortFields.value.length) return false
+  const currentDirections = sortDirectionsInput.value ? sortDirectionsInput.value.split(',').map(d => d.trim()) : []
+  return currentDirections.length < sortFields.value.length
+})
+
+const canRemoveDirection = computed(() => {
+  if (!sortDirectionsInput.value) return false
+  const currentDirections = sortDirectionsInput.value.split(',').map(d => d.trim())
+  return currentDirections.length > 0
+})
+
+// Обработчики
+const handleSortFieldsChange = (newFields) => {
+  // При изменении полей сбрасываем направления
+  sortDirectionsInput.value = ''
+  sortError.value = ''
+}
+
+const addDirection = (direction) => {
+  if (!canAddDirection.value) return
+
+  const currentDirections = sortDirectionsInput.value ? sortDirectionsInput.value.split(',').map(d => d.trim()) : []
+  currentDirections.push(direction)
+  sortDirectionsInput.value = currentDirections.join(',')
+}
+
+const removeLastDirection = () => {
+  if (!canRemoveDirection.value) return
+
+  const currentDirections = sortDirectionsInput.value.split(',').map(d => d.trim())
+  currentDirections.pop()
+  sortDirectionsInput.value = currentDirections.join(',')
+}
 
 // Загрузка данных
 const loadFlats = async (props = {}) => {
@@ -458,9 +587,9 @@ const loadFlats = async (props = {}) => {
 
     // Формируем параметры сортировки
     const sortParams = {}
-    if (sortFields.value.length) {
+    if (sortFields.value.length && sortDirectionsInput.value) {
       sortParams.sortBy = sortFields.value.join(',')
-      sortParams.sortDirection = sortDirection.value
+      sortParams.sortDirection = sortDirectionsInput.value
     }
 
     const response = await flatsApi.getFlats(
@@ -476,6 +605,7 @@ const loadFlats = async (props = {}) => {
     pagination.value.rowsNumber = response.data.numberOfElements
     pagination.value.page = page
     pagination.value.rowsPerPage = rowsPerPage
+    sortError.value = ''
   } catch (error) {
     let errorMessage = 'Неизвестная ошибка'
     if (error.response && error.response.data) {
@@ -508,6 +638,36 @@ const onRequest = (props) => {
 
 // Применение сортировки
 const applySorting = () => {
+  if (!sortDirectionsInput.value) {
+    sortError.value = 'Введите направления сортировки'
+    return
+  }
+
+  const directions = sortDirectionsInput.value.split(',').map(d => d.trim())
+
+  if (directions.length !== sortFields.value.length) {
+    sortError.value = `Количество направлений (${directions.length}) не совпадает с количеством полей (${sortFields.value.length})`
+    return
+  }
+
+  // Валидация допустимых направлений
+  const validDirections = ['asc', 'desc']
+  const invalidDirection = directions.find(d => !validDirections.includes(d.toLowerCase()))
+  if (invalidDirection) {
+    sortError.value = `Недопустимое направление: ${invalidDirection}. Допустимые значения: asc, desc`
+    return
+  }
+
+  sortError.value = ''
+  pagination.value.page = 1
+  loadFlats()
+}
+
+// Сброс сортировки
+const resetSorting = () => {
+  sortFields.value = []
+  sortDirectionsInput.value = ''
+  sortError.value = ''
   pagination.value.page = 1
   loadFlats()
 }
