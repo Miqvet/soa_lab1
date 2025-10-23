@@ -18,21 +18,13 @@ import lombok.*;
 import java.util.ArrayList;
 import java.util.List;
 
-@Entity
-@Table(name = "houses")
-@JsonInclude(JsonInclude.Include.NON_NULL)
-@Schema(description = "Дом")
-@AllArgsConstructor
+@Embeddable
+@Getter
+@Setter(value = AccessLevel.PACKAGE)
 @Builder
-@Data
 @NoArgsConstructor
+@AllArgsConstructor
 public class House {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Schema(title = "ID дома", accessMode = Schema.AccessMode.READ_ONLY)
-    private Long id;
-
     @JsonProperty("name")
     @Column(name = "name")
     @Schema(title = "Имя дома", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
@@ -61,8 +53,4 @@ public class House {
     @Positive(message = "Количество лифтов должно быть положительным числом")
     @Min(value = 1, message = "Количество лифтов должно быть не менее 1")
     private Integer numberOfLifts;
-
-    @OneToMany(mappedBy = "house", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JsonIgnore
-    private List<Flat> flats = new ArrayList<>();
 }

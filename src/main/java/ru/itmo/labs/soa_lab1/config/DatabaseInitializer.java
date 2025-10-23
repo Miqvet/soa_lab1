@@ -1,132 +1,88 @@
 package ru.itmo.labs.soa_lab1.config;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import ru.itmo.labs.soa_lab1.repository.FlatRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import ru.itmo.labs.soa_lab1.repository.entity.*;
 
+import java.time.LocalDate;
+import java.util.List;
+
+
 @Component
+@RequiredArgsConstructor
 public class DatabaseInitializer implements CommandLineRunner {
-    
-    @Autowired
-    private FlatRepository flatRepository;
-    
+
+    private final FlatRepository flatRepository;
+
     @Override
     @Transactional
-    public void run(String... args) throws Exception {
-        // Очищаем таблицы
+    public void run(String... args) {
+        // Очистка таблицы перед инициализацией
         flatRepository.deleteAll();
-        
-        // Создаем и сохраняем 4 квартиры
-        createSampleFlats();
+
+        // Создание и сохранение тестовых квартир
+        List<Flat> flats = List.of(
+                buildFlat(
+                        "Luxury Apartment",
+                        new Coordinates(10L, -100.0f),
+                        new House("Elite Tower", 2020L, 25, 4),
+                        100, 3, 75.5, 15_000_000, true,
+                        Furnish.DESIGNER, Transport.ENOUGH
+                ),
+                buildFlat(
+                        "Comfort Flat",
+                        new Coordinates(20L, 200.5f),
+                        new House("Comfort House", 2015L, 9, 2),
+                        65, 2, 45.0, 8_000_000, false,
+                        Furnish.FINE, Transport.LITTLE
+                ),
+                buildFlat(
+                        "Studio Downtown",
+                        new Coordinates(30L, -500.0f),
+                        new House("Sky Residence", 2022L, 30, 6),
+                        45, 1, 35.2, 5_000_000, true,
+                        Furnish.LITTLE, Transport.FEW
+                ),
+                buildFlat(
+                        "Family Apartment",
+                        new Coordinates(40L, 300.2f),
+                        new House("City View", 2018L, 12, 3),
+                        120, 4, 90.0, 12_000_000, true,
+                        Furnish.FINE, Transport.ENOUGH
+                )
+        );
+
+        flatRepository.saveAll(flats);
         System.out.println("=== 4 ТЕСТОВЫЕ КВАРТИРЫ СОХРАНЕНЫ В БАЗУ ===");
     }
-    
-    private void createSampleFlats() {
-        // Квартира 1
-        Coordinates coords1 = new Coordinates();
-        coords1.setX(10L);
-        coords1.setY(-100.0f);
-        
-        House house1 = new House();
-        house1.setName("Elite Tower");
-        house1.setYear(2020L);
-        house1.setNumberOfFloors(25);
-        house1.setNumberOfLifts(4);
-        
-        Flat flat1 = new Flat();
-        flat1.setName("Luxury Apartment");
-        flat1.setCoordinates(coords1);
-        flat1.setCreationDate(java.time.LocalDate.of(2024, 1, 15));
-        flat1.setArea(100);
-        flat1.setNumberOfRooms(3);
-        flat1.setLivingSpace(75.5);
-        flat1.setFurnish(Furnish.DESIGNER);
-        flat1.setTransport(Transport.ENOUGH);
-        flat1.setHouse(house1);
-        flat1.setPrice(15000000.0);
-        flat1.setHasBalcony(true);
-        
-        flatRepository.save(flat1);
-        
-        // Квартира 2
-        Coordinates coords2 = new Coordinates();
-        coords2.setX(20L);
-        coords2.setY(200.5f);
-        
-        House house2 = new House();
-        house2.setName("Comfort House");
-        house2.setYear(2015L);
-        house2.setNumberOfFloors(9);
-        house2.setNumberOfLifts(2);
-        
-        Flat flat2 = new Flat();
-        flat2.setName("Comfort Flat");
-        flat2.setCoordinates(coords2);
-        flat2.setCreationDate(java.time.LocalDate.of(2024, 1, 16));
-        flat2.setArea(65);
-        flat2.setNumberOfRooms(2);
-        flat2.setLivingSpace(45.0);
-        flat2.setFurnish(Furnish.FINE);
-        flat2.setTransport(Transport.LITTLE);
-        flat2.setHouse(house2);
-        flat2.setPrice(8000000.0);
-        flat2.setHasBalcony(false);
-        
-        flatRepository.save(flat2);
-        
-        // Квартира 3
-        Coordinates coords3 = new Coordinates();
-        coords3.setX(30L);
-        coords3.setY(-500.0f);
-        
-        House house3 = new House();
-        house3.setName("Sky Residence");
-        house3.setYear(2022L);
-        house3.setNumberOfFloors(30);
-        house3.setNumberOfLifts(6);
-        
-        Flat flat3 = new Flat();
-        flat3.setName("Studio Downtown");
-        flat3.setCoordinates(coords3);
-        flat3.setCreationDate(java.time.LocalDate.of(2024, 1, 17));
-        flat3.setArea(45);
-        flat3.setNumberOfRooms(1);
-        flat3.setLivingSpace(35.2);
-        flat3.setFurnish(Furnish.LITTLE);
-        flat3.setTransport(Transport.FEW);
-        flat3.setHouse(house3);
-        flat3.setPrice(5000000.0);
-        flat3.setHasBalcony(true);
-        
-        flatRepository.save(flat3);
-        
-        // Квартира 4
-        Coordinates coords4 = new Coordinates();
-        coords4.setX(40L);
-        coords4.setY(300.2f);
-        
-        House house4 = new House();
-        house4.setName("City View");
-        house4.setYear(2018L);
-        house4.setNumberOfFloors(12);
-        house4.setNumberOfLifts(3);
-        
-        Flat flat4 = new Flat();
-        flat4.setName("Family Apartment");
-        flat4.setCoordinates(coords4);
-        flat4.setCreationDate(java.time.LocalDate.of(2024, 1, 18));
-        flat4.setArea(120);
-        flat4.setNumberOfRooms(4);
-        flat4.setLivingSpace(90.0);
-        flat4.setFurnish(Furnish.FINE);
-        flat4.setTransport(Transport.ENOUGH);
-        flat4.setHouse(house4);
-        flat4.setPrice(12000000.0);
-        flat4.setHasBalcony(true);
-        
-        flatRepository.save(flat4);
+
+    private Flat buildFlat(
+            String name,
+            Coordinates coords,
+            House house,
+            int area,
+            int rooms,
+            double livingSpace,
+            int price,
+            boolean hasBalcony,
+            Furnish furnish,
+            Transport transport
+    ) {
+        return Flat.builder()
+                .name(name)
+                .coordinates(coords)
+                .creationDate(LocalDate.now())
+                .area(area)
+                .numberOfRooms(rooms)
+                .livingSpace(livingSpace)
+                .price(price)
+                .hasBalcony(hasBalcony)
+                .furnish(furnish)
+                .transport(transport)
+                .house(house)
+                .build();
     }
 }

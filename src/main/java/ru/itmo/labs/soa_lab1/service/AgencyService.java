@@ -31,11 +31,7 @@ public class AgencyService {
         List<Long> ids = Arrays.asList(id1, id2, id3);
         List<Flat> flats = flatRepository.findByIdIn(ids);
 
-        if (flats.size() != 3) {
-            return Optional.empty();
-        }
-
         return flats.stream()
-                .max(Comparator.comparingDouble(Flat::getPrice));
+                .max(Comparator.comparingDouble(Flat::getPrice)).stream().findFirst();
     }
 }

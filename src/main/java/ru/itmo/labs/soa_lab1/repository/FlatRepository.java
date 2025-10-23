@@ -14,11 +14,4 @@ public interface FlatRepository extends JpaRepository<Flat, Long> {
     List<Flat> findByHasBalconyOrderByPriceAsc(boolean hasBalcony);
     List<Flat> findByHasBalconyOrderByPriceDesc(boolean hasBalcony);
     List<Flat> findByIdIn(List<Long> ids);
-
-    // Существующие методы...
-    List<Flat> findByHasBalcony(boolean hasBalcony);
-    List<Flat> findByAreaLessThanEqual(int maxArea);
-    List<Flat> findByTransport(Transport transport);
-    List<Flat> findByFurnish(Furnish furnish);
-    List<Flat> findByNameContainingIgnoreCase(String namePart);
 }
