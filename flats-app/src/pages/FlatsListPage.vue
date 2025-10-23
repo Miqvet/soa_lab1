@@ -63,6 +63,39 @@
       </q-card-section>
     </q-card>
 
+    <!-- Специальные фильтры -->
+    <q-card class="q-mb-md">
+      <q-card-section>
+        <div class="text-h6">Специальные фильтры</div>
+        <div class="row q-col-gutter-md items-center">
+          <div class="col-12 col-sm-6 col-md-4">
+            <q-input
+              v-model="roomsFilter"
+              type="number"
+              label="Количество комнат больше чем"
+              :rules="[val => val === null || val === '' || (val >= 1 && val <= 8) || 'Количество комнат должно быть от 1 до 8']"
+            />
+          </div>
+          <div class="col-12 col-sm-6 col-md-4 flex items-end">
+            <q-btn
+              label="Найти квартиры"
+              @click="applyRoomsFilter"
+              color="primary"
+              :disabled="!roomsFilter"
+              class="q-mr-sm"
+            />
+            <q-btn
+              label="Сбросить"
+              @click="resetRoomsFilter"
+              color="secondary"
+              :disabled="!roomsFilter"
+              flat
+            />
+          </div>
+        </div>
+      </q-card-section>
+    </q-card>
+
     <!-- Сортировка -->
     <q-card class="q-mb-md">
       <q-card-section>
@@ -476,6 +509,10 @@ const saving = ref(false)
 const showAddDialog = ref(false)
 const editingFlat = ref(null)
 
+// Специальные фильтры
+const roomsFilter = ref(null)
+const furnishDeleteFilter = ref(null)
+
 // Сортировка
 const sortFields = ref([])
 const sortDirectionsInput = ref('')
@@ -576,6 +613,54 @@ const removeLastDirection = () => {
   const currentDirections = sortDirectionsInput.value.split(',').map(d => d.trim())
   currentDirections.pop()
   sortDirectionsInput.value = currentDirections.join(',')
+}
+
+// Новые методы для специальных фильтров
+const applyRoomsFilter = async () => {
+  if (!roomsFilter.value) return
+
+  loading.value = true
+  try {
+    const response = await flatsApi.getFlatsWithMoreRooms(roomsFilter.value)
+    flats.value = response.data
+    // Сбрасываем пагинацию для специального фильтра
+    pagination.value = {
+      page: 1,
+      rowsPerPage: 0,
+      rowsNumber: response.data.length
+    }
+    $q.notify({
+      type: 'positive',
+      message: `Найдено ${response.data.length} квартир с количеством комнат больше ${roomsFilter.value}`
+    })
+  } catch (error) {
+    let errorMessage = 'Неизвестная ошибка'
+    if (error.response && error.response.data) {
+      const errorData = error.response.data
+      if (errorData.message) {
+        errorMessage = errorData.message + '. '
+        if (errorData.errors && errorData.errors.length > 0) {
+          errorMessage += errorData.errors.join(', ')
+        }
+      } else {
+        errorMessage = errorData.message || JSON.stringify(errorData)
+      }
+    } else if (error.message) {
+      errorMessage = error.message
+    }
+    $q.notify({
+      type: 'negative',
+      message: errorMessage,
+      position: 'top'
+    })
+  } finally {
+    loading.value = false
+  }
+}
+
+const resetRoomsFilter = () => {
+  roomsFilter.value = null
+  loadFlats()
 }
 
 // Загрузка данных
@@ -686,6 +771,7 @@ const resetFilters = () => {
     transport: null,
     has_balcony: null
   }
+  roomsFilter.value = null
   loadFlats()
 }
 
