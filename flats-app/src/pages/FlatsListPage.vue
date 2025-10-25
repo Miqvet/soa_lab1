@@ -120,7 +120,7 @@
             <div class="row q-col-gutter-xs q-mb-xs">
               <div class="col-4">
                 <q-btn
-                  label="Asc"
+                  label="Вверх"
                   color="primary"
                   outline
                   class="full-width"
@@ -130,7 +130,7 @@
               </div>
               <div class="col-4">
                 <q-btn
-                  label="Desc"
+                  label="Вниз"
                   color="primary"
                   outline
                   class="full-width"
@@ -207,6 +207,7 @@
       />
     </q-page-sticky>
 
+    <!-- Диалог добавления/редактирования квартиры -->
     <q-dialog v-model="showAddDialog" persistent>
       <q-card style="min-width: 70%; max-width: 900px">
         <q-card-section class="bg-primary text-white">
@@ -214,7 +215,7 @@
         </q-card-section>
 
         <q-card-section class="q-pt-lg scroll" style="max-height: 70vh">
-          <q-form @submit="saveFlat" class="q-gutter-pa-lg">
+          <q-form @submit="saveFlat" class="q-gutter-pa-lg" ref="formRef">
             <!-- Основная информация -->
             <div class="row q-col-gutter-lg">
               <div class="col-12">
@@ -227,51 +228,61 @@
                   v-model="flatForm.name"
                   label="Название *"
                   outlined
-                  :rules="[val => !!val || 'Обязательное поле']"
+                  :rules="[
+                    val => !!val || 'Обязательное поле',
+                    val => val && val.trim().length > 0 || 'Название не может быть пустым'
+                  ]"
                 />
               </div>
               <div class="col-12 col-sm-6">
                 <q-input
-                  v-model="flatForm.area"
+                  v-model.number="flatForm.area"
                   type="number"
                   label="Площадь *"
                   outlined
                   :rules="[
                     val => !!val || 'Обязательное поле',
-                    val => val > 0 && val <= 784 || 'Площадь должна быть от 1 до 784'
+                    val => val > 0 || 'Площадь должна быть больше 0',
+                    val => val <= 784 || 'Максимальная площадь: 784'
                   ]"
                 />
               </div>
               <div class="col-12 col-sm-6">
                 <q-input
-                  v-model="flatForm.number_of_rooms"
+                  v-model.number="flatForm.number_of_rooms"
                   type="number"
                   label="Количество комнат *"
                   outlined
                   :rules="[
                     val => !!val || 'Обязательное поле',
-                    val => val > 0 && val <= 8 || 'Количество комнат должно быть от 1 до 8'
+                    val => val > 0 || 'Количество комнат должно быть больше 0',
+                    val => val <= 8 || 'Максимальное количество комнат: 8'
                   ]"
                 />
               </div>
               <div class="col-12 col-sm-6">
                 <q-input
-                  v-model="flatForm.living_space"
+                  v-model.number="flatForm.living_space"
                   type="number"
                   label="Жилая площадь *"
                   outlined
-                  :rules="[val => !!val || 'Обязательное поле']"
+                  step="0.01"
+                  :rules="[
+                    val => !!val || 'Обязательное поле',
+                    val => val > 0 || 'Жилая площадь должна быть больше 0'
+                  ]"
                 />
               </div>
               <div class="col-12 col-sm-6">
                 <q-input
-                  v-model="flatForm.price"
+                  v-model.number="flatForm.price"
                   type="number"
                   label="Цена *"
                   outlined
+                  step="0.01"
                   :rules="[
                     val => !!val || 'Обязательное поле',
-                    val => val > 0 || 'Цена должна быть положительной'
+                    val => val > 0 || 'Цена должна быть больше 0'
                   ]"
                 />
               </div>
@@ -315,24 +326,25 @@
 
               <div class="col-12 col-sm-6">
                 <q-input
-                  v-model="flatForm.coordinates.x"
+                  v-model.number="flatForm.coordinates.x"
                   type="number"
                   label="Координата X *"
                   outlined
                   :rules="[
-                    val => !!val || 'Обязательное поле',
+                    val => val !== null && val !== undefined || 'Обязательное поле',
                     val => val > -13 || 'Значение должно быть больше -13'
                   ]"
                 />
               </div>
               <div class="col-12 col-sm-6">
                 <q-input
-                  v-model="flatForm.coordinates.y"
+                  v-model.number="flatForm.coordinates.y"
                   type="number"
                   label="Координата Y *"
                   outlined
+                  step="0.01"
                   :rules="[
-                    val => !!val || 'Обязательное поле',
+                    val => val !== null && val !== undefined || 'Обязательное поле',
                     val => val > -733 || 'Значение должно быть больше -733'
                   ]"
                 />
@@ -351,42 +363,46 @@
                   v-model="flatForm.house.name"
                   label="Название дома *"
                   outlined
-                  :rules="[val => !!val || 'Обязательное поле']"
+                  :rules="[
+                    val => !!val || 'Обязательное поле',
+                    val => val && val.trim().length > 0 || 'Название дома не может быть пустым'
+                  ]"
                 />
               </div>
               <div class="col-12 col-sm-6">
                 <q-input
-                  v-model="flatForm.house.year"
+                  v-model.number="flatForm.house.year"
                   type="number"
                   label="Год постройки *"
                   outlined
                   :rules="[
                     val => !!val || 'Обязательное поле',
-                    val => val >= 1 && val <= 370 || 'Год должен быть от 1 до 370'
+                    val => val > 0 || 'Год должен быть больше 0',
+                    val => val <= 370 || 'Максимальный год: 370'
                   ]"
                 />
               </div>
               <div class="col-12 col-sm-6">
                 <q-input
-                  v-model="flatForm.house.number_of_floors"
+                  v-model.number="flatForm.house.number_of_floors"
                   type="number"
                   label="Количество этажей *"
                   outlined
                   :rules="[
                     val => !!val || 'Обязательное поле',
-                    val => val >= 1 || 'Должен быть хотя бы 1 этаж'
+                    val => val > 0 || 'Должен быть хотя бы 1 этаж'
                   ]"
                 />
               </div>
               <div class="col-12 col-sm-6">
                 <q-input
-                  v-model="flatForm.house.number_of_lifts"
+                  v-model.number="flatForm.house.number_of_lifts"
                   type="number"
                   label="Количество лифтов *"
                   outlined
                   :rules="[
-                    val => !!val || 'Обязательное поле',
-                    val => val >= 1 || 'Должен быть хотя бы 1 лифт'
+                    val => val !== null && val !== undefined || 'Обязательное поле',
+                    val => val > 0 || 'Должен быть хотя бы 1 лифт'
                   ]"
                 />
               </div>
@@ -405,6 +421,7 @@
                 :label="editingFlat ? 'Сохранить' : 'Добавить'"
                 color="primary"
                 :loading="saving"
+                :disable="!isFormValid"
               />
             </q-card-actions>
           </q-form>
@@ -420,6 +437,7 @@ import { useQuasar } from 'quasar'
 import { flatsApi } from '../api/flats.js'
 
 const $q = useQuasar()
+const formRef = ref(null)
 
 // Маппинг для отображения английских значений на русские
 const furnishMapping = {
@@ -559,6 +577,32 @@ const flatForm = ref({
     number_of_floors: 0,
     number_of_lifts: 0
   }
+})
+
+// Вычисляемое свойство для проверки валидности формы
+const isFormValid = computed(() => {
+  const form = flatForm.value
+
+  // Проверка основных полей
+  if (!form.name || !form.name.trim()) return false
+  if (!form.area || form.area <= 0 || form.area > 784) return false
+  if (!form.number_of_rooms || form.number_of_rooms <= 0 || form.number_of_rooms > 8) return false
+  if (!form.living_space || form.living_space <= 0) return false
+  if (!form.price || form.price <= 0) return false
+  if (!form.furnish) return false
+  if (!form.transport) return false
+
+  // Проверка координат
+  if (form.coordinates.x === null || form.coordinates.x === undefined || form.coordinates.x <= -13) return false
+  if (form.coordinates.y === null || form.coordinates.y === undefined || form.coordinates.y <= -733) return false
+
+  // Проверка дома
+  if (!form.house.name || !form.house.name.trim()) return false
+  if (!form.house.year || form.house.year <= 0 || form.house.year > 370) return false
+  if (!form.house.number_of_floors || form.house.number_of_floors <= 0) return false
+  if (form.house.number_of_lifts === null || form.house.number_of_lifts === undefined || form.house.number_of_lifts <= 0) return false
+
+  return true
 })
 
 // Вычисляемые свойства
@@ -784,6 +828,16 @@ const editFlat = (flat) => {
 
 // Сохранение квартиры
 const saveFlat = async () => {
+  // Дополнительная проверка перед отправкой
+  if (!isFormValid.value) {
+    $q.notify({
+      type: 'negative',
+      message: 'Пожалуйста, заполните все поля корректно',
+      position: 'top'
+    })
+    return
+  }
+
   saving.value = true
   try {
     if (editingFlat.value) {
