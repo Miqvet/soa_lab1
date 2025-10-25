@@ -54,7 +54,8 @@
                 outlined
                 dense
                 style="min-width: 150px; max-width: 200px"
-                :rules="[val => val > 0 || 'ID должен быть положительным числом']"
+                :rules="[validatePositiveInteger]"
+                @update:model-value="val => flatId = enforceInteger(val)"
               />
               <q-btn
                 label="Найти по ID"
@@ -92,9 +93,12 @@
                   v-model="flatForm.name"
                   label="Название *"
                   outlined
+                  maxlength="250"
+                  counter
                   :rules="[
                     val => !!val || 'Обязательное поле',
-                    val => val && val.trim().length > 0 || 'Название не может быть пустым'
+                    val => val && val.trim().length > 0 || 'Название не может быть пустым',
+                    val => val.length <= 250 || 'Максимальная длина: 250 символов'
                   ]"
                 />
               </div>
@@ -106,9 +110,10 @@
                   outlined
                   :rules="[
                     val => !!val || 'Обязательное поле',
-                    val => val > 0 || 'Площадь должна быть больше 0',
+                    val => validatePositiveInteger(val) === true || validatePositiveInteger(val),
                     val => val <= 784 || 'Максимальная площадь: 784'
                   ]"
+                  @update:model-value="val => flatForm.area = enforceInteger(val)"
                 />
               </div>
               <div class="col-12 col-sm-6">
@@ -119,9 +124,10 @@
                   outlined
                   :rules="[
                     val => !!val || 'Обязательное поле',
-                    val => val > 0 || 'Количество комнат должно быть больше 0',
+                    val => validatePositiveInteger(val) === true || validatePositiveInteger(val),
                     val => val <= 8 || 'Максимальное количество комнат: 8'
                   ]"
+                  @update:model-value="val => flatForm.number_of_rooms = enforceInteger(val)"
                 />
               </div>
               <div class="col-12 col-sm-6">
@@ -130,10 +136,12 @@
                   type="number"
                   label="Жилая площадь *"
                   outlined
-                  step="0.01"
+                  step="0.001"
                   :rules="[
                     val => !!val || 'Обязательное поле',
-                    val => val > 0 || 'Жилая площадь должна быть больше 0'
+                    val => val > 0 || 'Жилая площадь должна быть больше 0',
+                    val => val <= 1000000000 || 'Максимальное значение: 1 000 000 000',
+                    val => validateDecimalPlaces(val, 3) === true || validateDecimalPlaces(val, 3)
                   ]"
                 />
               </div>
@@ -143,10 +151,12 @@
                   type="number"
                   label="Цена *"
                   outlined
-                  step="0.01"
+                  step="0.001"
                   :rules="[
                     val => !!val || 'Обязательное поле',
-                    val => val > 0 || 'Цена должна быть больше 0'
+                    val => val > 0 || 'Цена должна быть больше 0',
+                    val => val <= 1000000000 || 'Максимальное значение: 1 000 000 000',
+                    val => validatePositiveInteger(val) === true || validatePositiveInteger(val)
                   ]"
                 />
               </div>
@@ -196,8 +206,11 @@
                   outlined
                   :rules="[
                     val => val !== null && val !== undefined || 'Обязательное поле',
-                    val => val > -13 || 'Значение должно быть больше -13'
+                    val => validateInteger(val) === true || validateInteger(val),
+                    val => val > -13 || 'Значение должно быть больше -13',
+                    val => val <= 1000000000 || 'Максимальное значение: 1 000 000 000'
                   ]"
+                  @update:model-value="val => flatForm.coordinates.x = enforceInteger(val)"
                 />
               </div>
               <div class="col-12 col-sm-6">
@@ -206,10 +219,12 @@
                   type="number"
                   label="Координата Y *"
                   outlined
-                  step="0.01"
+                  step="0.001"
                   :rules="[
                     val => val !== null && val !== undefined || 'Обязательное поле',
-                    val => val > -733 || 'Значение должно быть больше -733'
+                    val => val > -733 || 'Значение должно быть больше -733',
+                    val => val <= 1000000000 || 'Максимальное значение: 1 000 000 000',
+                    val => validateDecimalPlaces(val, 3) === true || validateDecimalPlaces(val, 3)
                   ]"
                 />
               </div>
@@ -227,9 +242,12 @@
                   v-model="flatForm.house.name"
                   label="Название дома *"
                   outlined
+                  maxlength="250"
+                  counter
                   :rules="[
                     val => !!val || 'Обязательное поле',
-                    val => val && val.trim().length > 0 || 'Название дома не может быть пустым'
+                    val => val && val.trim().length > 0 || 'Название дома не может быть пустым',
+                    val => val.length <= 250 || 'Максимальная длина: 250 символов'
                   ]"
                 />
               </div>
@@ -241,9 +259,10 @@
                   outlined
                   :rules="[
                     val => !!val || 'Обязательное поле',
-                    val => val > 0 || 'Год должен быть больше 0',
+                    val => validatePositiveInteger(val) === true || validatePositiveInteger(val),
                     val => val <= 370 || 'Максимальный год: 370'
                   ]"
+                  @update:model-value="val => flatForm.house.year = enforceInteger(val)"
                 />
               </div>
               <div class="col-12 col-sm-6">
@@ -254,8 +273,10 @@
                   outlined
                   :rules="[
                     val => !!val || 'Обязательное поле',
-                    val => val > 0 || 'Должен быть хотя бы 1 этаж'
+                    val => validatePositiveInteger(val) === true || validatePositiveInteger(val),
+                    val => val <= 1000000000 || 'Максимальное значение: 1 000 000 000'
                   ]"
+                  @update:model-value="val => flatForm.house.number_of_floors = enforceInteger(val)"
                 />
               </div>
               <div class="col-12 col-sm-6">
@@ -266,8 +287,10 @@
                   outlined
                   :rules="[
                     val => val !== null && val !== undefined || 'Обязательное поле',
-                    val => val > 0 || 'Должен быть хотя бы 1 лифт'
+                    val => validatePositiveInteger(val) === true || validatePositiveInteger(val),
+                    val => val <= 1000000000 || 'Максимальное значение: 1 000 000 000'
                   ]"
+                  @update:model-value="val => flatForm.house.number_of_lifts = enforceInteger(val)"
                 />
               </div>
             </div>
@@ -347,11 +370,11 @@
               </div>
               <div class="col-12 col-sm-6">
                 <div class="text-caption text-grey-7">Жилая площадь</div>
-                <div class="text-body1">{{ viewedFlat.living_space }} м²</div>
+                <div class="text-body1">{{ formatDecimal(viewedFlat.living_space) }} м²</div>
               </div>
               <div class="col-12 col-sm-6">
                 <div class="text-caption text-grey-7">Цена</div>
-                <div class="text-body1">{{ viewedFlat.price }} ₽</div>
+                <div class="text-body1">{{ formatDecimal(viewedFlat.price) }} ₽</div>
               </div>
               <div class="col-12 col-sm-6">
                 <div class="text-caption text-grey-7">Отделка</div>
@@ -384,7 +407,7 @@
               </div>
               <div class="col-12 col-sm-6">
                 <div class="text-caption text-grey-7">Координата Y</div>
-                <div class="text-body1">{{ viewedFlat.coordinates.y }}</div>
+                <div class="text-body1">{{ formatDecimal(viewedFlat.coordinates.y) }}</div>
               </div>
             </div>
 
@@ -462,6 +485,90 @@ const transportOptions = [
   { label: 'Достаточно', value: 'ENOUGH' }
 ]
 
+// Жесткая валидация целых положительных чисел
+const validatePositiveInteger = (val) => {
+  if (val === null || val === '' || val === undefined) {
+    return 'Обязательное поле'
+  }
+
+  const num = Number(val)
+  if (isNaN(num) || !Number.isInteger(num) || num <= 0) {
+    return 'Введите целое положительное число'
+  }
+
+  if (num > 1000000000) {
+    return 'Максимальное значение: 1 000 000 000'
+  }
+
+  return true
+}
+
+// Валидация целых чисел (может быть отрицательным)
+const validateInteger = (val) => {
+  if (val === null || val === '' || val === undefined) {
+    return 'Обязательное поле'
+  }
+
+  const num = Number(val)
+  if (isNaN(num) || !Number.isInteger(num)) {
+    return 'Введите целое число'
+  }
+
+  if (num > 1000000000) {
+    return 'Максимальное значение: 1 000 000 000'
+  }
+
+  return true
+}
+
+// Валидация количества знаков после запятой
+const validateDecimalPlaces = (val, maxDecimalPlaces) => {
+  if (val === null || val === '' || val === undefined) {
+    return true
+  }
+
+  const num = Number(val)
+  if (isNaN(num)) {
+    return 'Введите число'
+  }
+
+  if (num > 1000000000) {
+    return 'Максимальное значение: 1 000 000 000'
+  }
+
+  // Проверка количества знаков после запятой
+  const decimalPart = String(val).split('.')[1]
+  if (decimalPart && decimalPart.length > maxDecimalPlaces) {
+    return `Максимум ${maxDecimalPlaces} знака после запятой`
+  }
+
+  return true
+}
+
+// Принудительное приведение к целому числу
+const enforceInteger = (val) => {
+  if (val === null || val === '' || val === undefined) {
+    return null
+  }
+
+  const num = Number(val)
+  if (isNaN(num)) {
+    return null
+  }
+
+  return Math.floor(num)
+}
+
+// Форматирование чисел с плавающей точкой для отображения
+const formatDecimal = (value) => {
+  if (value === null || value === undefined) return '0'
+  const num = Number(value)
+  if (isNaN(num)) return '0'
+
+  // Округляем до 3 знаков после запятой для отображения
+  return Math.round(num * 1000) / 1000
+}
+
 // Реактивные данные
 const jobLoading = ref(false)
 const uniqueSpacesResult = ref(null)
@@ -523,23 +630,23 @@ const isFormValid = computed(() => {
   const form = flatForm.value
 
   // Проверка основных полей
-  if (!form.name || !form.name.trim()) return false
+  if (!form.name || !form.name.trim() || form.name.length > 250) return false
   if (!form.area || form.area <= 0 || form.area > 784) return false
   if (!form.number_of_rooms || form.number_of_rooms <= 0 || form.number_of_rooms > 8) return false
-  if (!form.living_space || form.living_space <= 0) return false
-  if (!form.price || form.price <= 0) return false
+  if (!form.living_space || form.living_space <= 0 || form.living_space > 1000000000) return false
+  if (!form.price || form.price <= 0 || form.price > 1000000000) return false
   if (!form.furnish) return false
   if (!form.transport) return false
 
   // Проверка координат
-  if (form.coordinates.x === null || form.coordinates.x === undefined || form.coordinates.x <= -13) return false
-  if (form.coordinates.y === null || form.coordinates.y === undefined || form.coordinates.y <= -733) return false
+  if (form.coordinates.x === null || form.coordinates.x === undefined || form.coordinates.x <= -13 || form.coordinates.x > 1000000000) return false
+  if (form.coordinates.y === null || form.coordinates.y === undefined || form.coordinates.y <= -733 || form.coordinates.y > 1000000000) return false
 
   // Проверка дома
-  if (!form.house.name || !form.house.name.trim()) return false
+  if (!form.house.name || !form.house.name.trim() || form.house.name.length > 250) return false
   if (!form.house.year || form.house.year <= 0 || form.house.year > 370) return false
-  if (!form.house.number_of_floors || form.house.number_of_floors <= 0) return false
-  if (form.house.number_of_lifts === null || form.house.number_of_lifts === undefined || form.house.number_of_lifts <= 0) return false
+  if (!form.house.number_of_floors || form.house.number_of_floors <= 0 || form.house.number_of_floors > 1000000000) return false
+  if (form.house.number_of_lifts === null || form.house.number_of_lifts === undefined || form.house.number_of_lifts <= 0 || form.house.number_of_lifts > 1000000000) return false
 
   return true
 })
@@ -781,6 +888,16 @@ const getFlatById = async () => {
     return
   }
 
+  // Дополнительная проверка перед отправкой
+  if (validatePositiveInteger(flatId.value) !== true) {
+    $q.notify({
+      type: 'negative',
+      message: 'ID должен быть целым положительным числом',
+      position: 'top'
+    })
+    return
+  }
+
   loadingFlat.value = true
   try {
     const response = await flatsApi.getFlatById(flatId.value)
@@ -817,6 +934,16 @@ const deleteFlatById = async () => {
     $q.notify({
       type: 'warning',
       message: 'Введите ID квартиры',
+      position: 'top'
+    })
+    return
+  }
+
+  // Дополнительная проверка перед отправкой
+  if (validatePositiveInteger(flatId.value) !== true) {
+    $q.notify({
+      type: 'negative',
+      message: 'ID должен быть целым положительным числом',
       position: 'top'
     })
     return
